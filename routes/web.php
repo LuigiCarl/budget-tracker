@@ -17,4 +17,9 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+// API Documentation route - accessible to authenticated users
+Route::get('/docs', function () {
+    return view('docs.api');
+})->middleware(['auth'])->name('api.docs');
+
 require __DIR__.'/auth.php';
