@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\ProfileController;
 
 /*
 |--------------------------------------------------------------------------
@@ -26,6 +27,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
+    
+    // Update user profile information
+    Route::put('/user/profile-information', [ProfileController::class, 'updateProfileInformation']);
+    
+    // Update user password
+    Route::put('/user/password', [ProfileController::class, 'updatePassword']);
     
     // Logout (revoke current token)
     Route::post('/logout', function (Request $request) {

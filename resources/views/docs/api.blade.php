@@ -252,6 +252,120 @@
                 </div>
             </div>
 
+            <!-- Update Profile Information Endpoint -->
+            <div class="endpoint-card bg-white rounded-lg shadow-md p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center gap-3">
+                        <span class="method-badge method-put">PUT</span>
+                        <span class="font-mono text-lg">/api/user/profile-information</span>
+                    </div>
+                    <span class="text-sm text-red-500">Authentication: Required</span>
+                </div>
+                
+                <p class="text-gray-600 mb-4">Update the authenticated user's profile information (name and email)</p>
+                
+                <div class="grid md:grid-cols-2 gap-6">
+                    <!-- Parameters -->
+                    <div>
+                        <h4 class="font-semibold text-gray-800 mb-2">Request Parameters</h4>
+                        <ul class="text-sm text-gray-600 space-y-1 mb-4">
+                            <li><code class="bg-gray-100 px-2 py-1 rounded">name</code> (string, required) - User's full name</li>
+                            <li><code class="bg-gray-100 px-2 py-1 rounded">email</code> (string, required) - User's email address</li>
+                        </ul>
+                        
+                        <!-- Test Form -->
+                        <div class="bg-gray-50 p-4 rounded-md">
+                            <h5 class="font-medium text-gray-800 mb-3">Test this endpoint</h5>
+                            <form onsubmit="testEndpoint(event, 'updateProfile')" class="space-y-2">
+                                <input name="name" placeholder="Full Name" class="w-full border border-gray-300 rounded px-3 py-2 text-sm" required>
+                                <input name="email" type="email" placeholder="Email" class="w-full border border-gray-300 rounded px-3 py-2 text-sm" required>
+                                <button type="submit" class="w-full bg-orange-500 text-white py-2 px-4 rounded hover:bg-orange-600 transition-colors">
+                                    Send Request
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <!-- Example Response -->
+                    <div>
+                        <h4 class="font-semibold text-gray-800 mb-2">Example Response</h4>
+                        <pre class="text-xs">{
+  "message": "Profile updated successfully",
+  "user": {
+    "id": 1,
+    "name": "Jane Smith",
+    "email": "jane@example.com",
+    "email_verified_at": null,
+    "created_at": "2024-01-15T10:30:00.000000Z",
+    "updated_at": "2024-01-15T11:45:00.000000Z"
+  }
+}</pre>
+                    </div>
+                </div>
+                
+                <!-- Response Container -->
+                <div id="response-updateProfile" class="mt-4 hidden">
+                    <h4 class="font-semibold text-gray-800 mb-2">Response</h4>
+                    <div class="response-container">
+                        <pre id="response-content-updateProfile"></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Update Password Endpoint -->
+            <div class="endpoint-card bg-white rounded-lg shadow-md p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center gap-3">
+                        <span class="method-badge method-put">PUT</span>
+                        <span class="font-mono text-lg">/api/user/password</span>
+                    </div>
+                    <span class="text-sm text-red-500">Authentication: Required</span>
+                </div>
+                
+                <p class="text-gray-600 mb-4">Update the authenticated user's password</p>
+                
+                <div class="grid md:grid-cols-2 gap-6">
+                    <!-- Parameters -->
+                    <div>
+                        <h4 class="font-semibold text-gray-800 mb-2">Request Parameters</h4>
+                        <ul class="text-sm text-gray-600 space-y-1 mb-4">
+                            <li><code class="bg-gray-100 px-2 py-1 rounded">current_password</code> (string, required) - Current password</li>
+                            <li><code class="bg-gray-100 px-2 py-1 rounded">password</code> (string, required) - New password (minimum 8 characters)</li>
+                            <li><code class="bg-gray-100 px-2 py-1 rounded">password_confirmation</code> (string, required) - Confirm new password</li>
+                        </ul>
+                        
+                        <!-- Test Form -->
+                        <div class="bg-gray-50 p-4 rounded-md">
+                            <h5 class="font-medium text-gray-800 mb-3">Test this endpoint</h5>
+                            <form onsubmit="testEndpoint(event, 'updatePassword')" class="space-y-2">
+                                <input name="current_password" type="password" placeholder="Current Password" class="w-full border border-gray-300 rounded px-3 py-2 text-sm" required>
+                                <input name="password" type="password" placeholder="New Password" class="w-full border border-gray-300 rounded px-3 py-2 text-sm" required>
+                                <input name="password_confirmation" type="password" placeholder="Confirm New Password" class="w-full border border-gray-300 rounded px-3 py-2 text-sm" required>
+                                <button type="submit" class="w-full bg-purple-500 text-white py-2 px-4 rounded hover:bg-purple-600 transition-colors">
+                                    Send Request
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <!-- Example Response -->
+                    <div>
+                        <h4 class="font-semibold text-gray-800 mb-2">Example Response</h4>
+                        <pre class="text-xs">{
+  "message": "Password updated successfully"
+}</pre>
+                    </div>
+                </div>
+                
+                <!-- Response Container -->
+                <div id="response-updatePassword" class="mt-4 hidden">
+                    <h4 class="font-semibold text-gray-800 mb-2">Response</h4>
+                    <div class="response-container">
+                        <pre id="response-content-updatePassword"></pre>
+                    </div>
+                </div>
+            </div>
+
             <!-- Logout Endpoint -->
             <div class="endpoint-card bg-white rounded-lg shadow-md p-6">
                 <div class="flex items-center justify-between mb-4">
@@ -327,6 +441,16 @@
                 url: '/api/user',
                 requiresAuth: true
             },
+            updateProfile: {
+                method: 'PUT',
+                url: '/api/user/profile-information',
+                requiresAuth: true
+            },
+            updatePassword: {
+                method: 'PUT',
+                url: '/api/user/password',
+                requiresAuth: true
+            },
             logout: {
                 method: 'POST',
                 url: '/api/logout',
@@ -383,13 +507,13 @@
                     headers['Authorization'] = `Bearer ${globalToken}`;
                 }
 
-                // Prepare request body for POST requests
+                // Prepare request body for POST and PUT requests
                 let requestOptions = {
                     method: endpoint.method,
                     headers: headers
                 };
 
-                if (endpoint.method === 'POST' && formData.entries().next().value) {
+                if ((endpoint.method === 'POST' || endpoint.method === 'PUT') && formData.entries().next().value) {
                     const data = {};
                     for (let [key, value] of formData.entries()) {
                         data[key] = value;
