@@ -29,10 +29,24 @@ Route::middleware('auth:sanctum')->group(function () {
     });
     
     // Update user profile information
-    Route::put('/user/profile-information', [ProfileController::class, 'updateProfileInformation']);
+    Route::put('/profile', [ProfileController::class, 'updateProfileInformation']);
     
     // Update user password
-    Route::put('/user/password', [ProfileController::class, 'updatePassword']);
+    Route::put('/password', [ProfileController::class, 'updatePassword']);
+    
+    // Create new API token
+    Route::post('/tokens', function (Request $request) {
+        $request->validate([
+            'name' => 'required|string|max:255',
+        ]);
+
+        $token = $request->user()->createToken($request->name);
+
+        return response()->json([
+            'token' => $token->plainTextToken,
+            'name' => $request->name
+        ]);
+    });
     
     // Logout (revoke current token)
     Route::post('/logout', function (Request $request) {

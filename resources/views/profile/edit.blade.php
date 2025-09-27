@@ -1,29 +1,39 @@
-<x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-            {{ __('Profile') }}
-        </h2>
-    </x-slot>
+@extends('layouts.base')
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
-            <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg">
-                <div class="max-w-xl">
-                    @include('profile.partials.update-profile-information-form')
-                </div>
-            </div>
+@section('title', 'Profile - ' . config('app.name'))
+@section('app-name', 'Profile Settings')
 
-            <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg">
-                <div class="max-w-xl">
-                    @include('profile.partials.update-password-form')
-                </div>
-            </div>
-
-            <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg">
-                <div class="max-w-xl">
-                    @include('profile.partials.delete-user-form')
-                </div>
-            </div>
-        </div>
+@section('content')
+    <!-- Hero Section -->
+    <div class="space-y-2 mb-8">
+        <h1 class="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">
+            Profile Settings
+        </h1>
+        <p class="text-xl text-muted-foreground">
+            Manage your account information and security settings.
+        </p>
     </div>
-</x-app-layout>
+
+    <div class="max-w-4xl space-y-6">
+        <!-- Update Profile Information -->
+        <x-ui.card title="Profile Information" description="Update your account's profile information and email address.">
+            <div class="max-w-xl">
+                @include('profile.partials.update-profile-information-form')
+            </div>
+        </x-ui.card>
+
+        <!-- Update Password -->
+        <x-ui.card title="Update Password" description="Ensure your account is using a long, random password to stay secure.">
+            <div class="max-w-xl">
+                @include('profile.partials.update-password-form')
+            </div>
+        </x-ui.card>
+
+        <!-- Delete Account -->
+        <x-ui.card title="Delete Account" description="Once your account is deleted, all of its resources and data will be permanently deleted.">
+            <div class="max-w-xl">
+                @include('profile.partials.delete-user-form')
+            </div>
+        </x-ui.card>
+    </div>
+@endsection
