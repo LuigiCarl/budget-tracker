@@ -17,6 +17,11 @@ class Category extends Model
         'type',
         'description',
         'color',
+        'is_default',
+    ];
+
+    protected $casts = [
+        'is_default' => 'boolean',
     ];
 
     /**
@@ -65,5 +70,67 @@ class Category extends Model
             'income' => 'Income',
             'expense' => 'Expense',
         ];
+    }
+
+    /**
+     * Check if this category has an active limiting budget.
+     */
+    public function hasActiveLimitingBudget()
+    {
+        return $this->active_budget && $this->active_budget->is_limiter;
+    }
+
+    /**
+     * Get the budget status for this category.
+     */
+    public function getBudgetStatus()
+    {
+        $budget = $this->active_budget;
+        
+        if (!$budget) {
+            return [
+                'has_budget' => false,
+                'is_limiter' => false,
+                'remaining' => null,
+                'is_exceeded' => false,
+                'overspending' => 0,
+            ];
+        }
+
+        return [
+            'has_budget' => true,
+            'is_limiter' => $budget->is_limiter,
+            'remaining' => $budget->remaining_amount,
+            'is_exceeded' => $budget->is_exceeded,
+            'overspending' => $budget->overspending_amount,
+            'budget_amount' => $budget->amount,
+            'spent_amount' => $budget->spent_amount,
+        ];
+    }
+
+    /**
+     * Get the default category for a specific type and user.
+     */
+    public static function getDefaultForUser($userId, $type = 'expense')
+    {
+        return static::where('user_id', $userId)
+                     ->where('type', $type)
+                     ->where('is_default', true)
+                     ->first();
+    }
+
+    /**
+     * Set this category as the default for its type, unsetting any other default categories.
+     */
+    public function setAsDefault()
+    {
+        // Remove default status from other categories of the same type for this user
+        static::where('user_id', $this->user_id)
+              ->where('type', $this->type)
+              ->where('id', '!=', $this->id)
+              ->update(['is_default' => false]);
+        
+        // Set this category as default
+        $this->update(['is_default' => true]);
     }
 }

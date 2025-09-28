@@ -37,18 +37,27 @@ class AccountController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'type' => 'required|in:cash,bank,credit_card',
-            'balance' => 'required|numeric|min:0',
+            'type' => 'required|in:cash,checking,savings,credit_card,investment',
+            'balance' => 'required|numeric',
             'description' => 'nullable|string|max:500',
         ]);
 
-        \App\Models\Account::create([
+        $account = \App\Models\Account::create([
             'user_id' => Auth::id(),
             'name' => $request->name,
             'type' => $request->type,
             'balance' => $request->balance,
             'description' => $request->description,
         ]);
+
+        // Check if this is an AJAX request
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'account' => $account,
+                'message' => 'Account created successfully.'
+            ]);
+        }
 
         return redirect()->route('accounts.index')->with('success', 'Account created successfully.');
     }
