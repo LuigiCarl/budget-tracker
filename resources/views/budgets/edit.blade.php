@@ -1,14 +1,21 @@
 @extends('layouts.base')
 
-@section('title', 'Create Budget - ' . config('app.name'))
+@section('title', 'Edit Budget - ' . config('ap                                <button type="button"
+                                        onclick="openCategoryModal()"
+                                        class="px-3 py-2 text-sm bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-md border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 transition-colors flex items-center"
+                                        title="Create new expense category">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                    </svg>
+                                </button>)
 @section('app-name', 'Budget Tracker')
 
 @section('content')
     <div class="max-w-2xl mx-auto">
         <div class="flex items-center justify-between mb-8">
             <div>
-                <h1 class="text-3xl font-bold">Create Budget</h1>
-                <p class="text-muted-foreground">Set spending limits for your expense categories</p>
+                <h1 class="text-3xl font-bold">Edit Budget</h1>
+                <p class="text-muted-foreground">Update spending limits for your expense categories</p>
             </div>
             <a href="{{ route('budgets.index') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -23,19 +30,6 @@
                 {{ session('error') }}
             </div>
         @endif
-        
-        @if (isset($noCategories) && $noCategories)
-            <div class="mb-6 p-4 bg-yellow-100 border border-yellow-400 text-yellow-700 rounded-lg">
-                <h3 class="font-medium mb-2">No Expense Categories Found</h3>
-                <p class="mb-3">You need to create at least one expense category before you can create budgets.</p>
-                <a href="{{ route('categories.create') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                    </svg>
-                    Create Expense Category
-                </a>
-            </div>
-        @endif
 
         @if ($errors->any())
             <div class="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
@@ -47,11 +41,11 @@
             </div>
         @endif
 
-        @if (!isset($noCategories) || !$noCategories)
         <div class="rounded-lg border border-border bg-card text-card-foreground shadow-sm">
             <div class="p-6">
-                <form action="{{ route('budgets.store') }}" method="POST">
+                <form action="{{ route('budgets.update', $budget) }}" method="POST">
                     @csrf
+                    @method('PUT')
                     
                     <div class="space-y-6">
                         <!-- Budget Name -->
@@ -62,7 +56,7 @@
                             <input type="text" 
                                    name="name" 
                                    id="name" 
-                                   value="{{ old('name') }}"
+                                   value="{{ old('name', $budget->name) }}"
                                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
                                    placeholder="e.g., Monthly Food Budget"
                                    required>
@@ -81,19 +75,19 @@
                                     <option value="">Select expense category</option>
                                     @foreach($expenseCategories as $category)
                                         <option value="{{ $category->id }}" 
-                                                {{ (old('category_id') ?: ($defaultExpenseCategory ? $defaultExpenseCategory->id : '')) == $category->id ? 'selected' : '' }}>
+                                                {{ (old('category_id', $budget->category_id) == $category->id) ? 'selected' : '' }}>
                                             {{ $category->name }}
                                         </option>
                                     @endforeach
                                 </select>
-                                <button type="button"
-                                        onclick="openCategoryModal()"
-                                        class="px-3 py-2 text-sm bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-md border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 transition-colors flex items-center"
-                                        title="Create new expense category">
+                                <a href="{{ route('categories.create') }}?type=expense" 
+                                   target="_blank"
+                                   class="px-3 py-2 text-sm bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-md border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 transition-colors flex items-center"
+                                   title="Create new expense category (opens in new tab)">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                                     </svg>
-                                </button>
+                                </a>
                             </div>
                             <p class="mt-1 text-sm text-gray-500">Only expense categories can have budgets</p>
                         </div>
@@ -110,7 +104,7 @@
                                 <input type="number" 
                                        name="amount" 
                                        id="amount" 
-                                       value="{{ old('amount') }}"
+                                       value="{{ old('amount', number_format($budget->amount, 2, '.', '')) }}"
                                        step="0.01"
                                        min="0.01"
                                        class="block w-full pl-7 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
@@ -128,7 +122,7 @@
                                 <input type="date" 
                                        name="start_date" 
                                        id="start_date" 
-                                       value="{{ old('start_date', date('Y-m-01')) }}"
+                                       value="{{ old('start_date', $budget->start_date) }}"
                                        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
                                        required>
                             </div>
@@ -139,7 +133,7 @@
                                 <input type="date" 
                                        name="end_date" 
                                        id="end_date" 
-                                       value="{{ old('end_date', date('Y-m-t')) }}"
+                                       value="{{ old('end_date', $budget->end_date) }}"
                                        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
                                        required>
                             </div>
@@ -154,7 +148,7 @@
                                       id="description" 
                                       rows="3"
                                       class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
-                                      placeholder="Optional description for this budget">{{ old('description') }}</textarea>
+                                      placeholder="Optional description for this budget">{{ old('description', $budget->description) }}</textarea>
                         </div>
 
                         <!-- Budget Limiter -->
@@ -164,7 +158,7 @@
                                        name="is_limiter" 
                                        id="is_limiter" 
                                        value="1"
-                                       {{ old('is_limiter') ? 'checked' : '' }}
+                                       {{ old('is_limiter', $budget->is_limiter) ? 'checked' : '' }}
                                        class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-600">
                             </div>
                             <div class="ml-3">
@@ -179,18 +173,19 @@
                         </div>
                     </div>
 
-                    <div class="flex justify-end space-x-4 pt-6 border-t border-gray-200 dark:border-gray-600">
-                        <a href="{{ route('budgets.index') }}" class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
+                    <div class="flex items-center justify-between pt-6 border-t mt-6">
+                        <button type="button" onclick="window.history.back()" 
+                                class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
                             Cancel
-                        </a>
-                        <button type="submit" class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                            Create Budget
+                        </button>
+                        <button type="submit" 
+                                class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors">
+                            Update Budget
                         </button>
                     </div>
                 </form>
             </div>
         </div>
-        @endif
     </div>
 
     <script>

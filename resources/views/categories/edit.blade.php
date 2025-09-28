@@ -116,6 +116,26 @@
                         @enderror
                     </div>
 
+                    <!-- Default Category -->
+                    <div class="flex items-start space-x-3">
+                        <input 
+                            type="checkbox" 
+                            name="is_default" 
+                            id="is_default" 
+                            value="1"
+                            {{ old('is_default', $category->is_default) ? 'checked' : '' }}
+                            class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                        <div class="flex-1">
+                            <label for="is_default" class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                Set as default category
+                            </label>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                                This category will be pre-selected when creating transactions and budgets of this type.
+                                Only one category per type (income/expense) can be set as default.
+                            </p>
+                        </div>
+                    </div>
+
                     <!-- Action Buttons -->
                     <div class="flex flex-col sm:flex-row gap-3 sm:justify-end pt-4 border-t">
                         <a href="{{ route('categories.index') }}" class="inline-flex items-center justify-center px-4 py-2 border border-border rounded-lg hover:bg-accent transition-colors">

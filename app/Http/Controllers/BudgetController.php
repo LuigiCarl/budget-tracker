@@ -43,7 +43,10 @@ class BudgetController extends Controller
             ]);
         }
         
-        return view('budgets.create', compact('expenseCategories'));
+        // Get default expense category
+        $defaultExpenseCategory = \App\Models\Category::getDefaultForUser(Auth::id(), 'expense');
+        
+        return view('budgets.create', compact('expenseCategories', 'defaultExpenseCategory'));
     }
 
     /**
@@ -58,9 +61,10 @@ class BudgetController extends Controller
             'start_date' => 'required|date',
             'end_date' => 'required|date|after:start_date',
             'description' => 'nullable|string|max:500',
+            'is_limiter' => 'boolean',
         ]);
 
-                // Verify that the category belongs to the authenticated user and is an expense category
+        // Verify that the category belongs to the authenticated user and is an expense category
         $category = \App\Models\Category::where('user_id', Auth::id())
             ->where('id', $request->category_id)
             ->where('type', 'expense')
@@ -94,6 +98,7 @@ class BudgetController extends Controller
             'start_date' => $request->start_date,
             'end_date' => $request->end_date,
             'description' => $request->description,
+            'is_limiter' => $request->boolean('is_limiter', false),
         ]);
 
         return redirect()->route('budgets.index')->with('success', 'Budget created successfully.');
@@ -129,7 +134,10 @@ class BudgetController extends Controller
             ->where('type', 'expense')
             ->get();
             
-        return view('budgets.edit', compact('budget', 'expenseCategories'));
+        // Get default expense category
+        $defaultExpenseCategory = \App\Models\Category::getDefaultForUser(Auth::id(), 'expense');
+            
+        return view('budgets.edit', compact('budget', 'expenseCategories', 'defaultExpenseCategory'));
     }
 
     /**
@@ -147,6 +155,7 @@ class BudgetController extends Controller
             'start_date' => 'required|date',
             'end_date' => 'required|date|after:start_date',
             'description' => 'nullable|string|max:500',
+            'is_limiter' => 'boolean',
         ]);
 
         // Verify that the category belongs to the authenticated user and is an expense category
@@ -174,7 +183,15 @@ class BudgetController extends Controller
             ]);
         }
 
-        $budget->update($request->all());
+        $budget->update([
+            'category_id' => $request->category_id,
+            'name' => $request->name,
+            'amount' => $request->amount,
+            'start_date' => $request->start_date,
+            'end_date' => $request->end_date,
+            'description' => $request->description,
+            'is_limiter' => $request->boolean('is_limiter', false),
+        ]);
 
         return redirect()->route('budgets.index')->with('success', 'Budget updated successfully.');
     }

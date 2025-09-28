@@ -47,7 +47,11 @@ class TransactionController extends Controller
                 ->with('error', 'You need to create at least one category before adding transactions.');
         }
         
-        return view('transactions.create', compact('accounts', 'categories'));
+        // Get default categories for both income and expense
+        $defaultIncomeCategory = \App\Models\Category::getDefaultForUser(Auth::id(), 'income');
+        $defaultExpenseCategory = \App\Models\Category::getDefaultForUser(Auth::id(), 'expense');
+        
+        return view('transactions.create', compact('accounts', 'categories', 'defaultIncomeCategory', 'defaultExpenseCategory'));
     }
 
     /**
@@ -81,11 +85,26 @@ class TransactionController extends Controller
                 ->where('end_date', '>=', $request->date)
                 ->first();
 
-            if ($activeBudget && $activeBudget->wouldExceedWith($request->amount)) {
-                $remaining = max($activeBudget->remaining_amount, 0);
-                return back()->withErrors([
-                    'amount' => "This expense would exceed your budget for {$category->name}. Remaining budget: $" . number_format($remaining, 2)
-                ]);
+            $budgetWarning = null;
+            $isLimiterBudget = false;
+
+            if ($activeBudget) {
+                $isLimiterBudget = $activeBudget->is_limiter;
+                
+                if ($activeBudget->wouldExceedWith($request->amount)) {
+                    $remaining = max($activeBudget->remaining_amount, 0);
+                    $overspendAmount = $request->amount - $remaining;
+                    
+                    if ($isLimiterBudget) {
+                        // Hard limit - prevent the transaction
+                        return back()->withErrors([
+                            'amount' => "This expense exceeds your budget limit for {$category->name}. Remaining budget: $" . number_format($remaining, 2)
+                        ]);
+                    } else {
+                        // Soft limit - allow but warn
+                        $budgetWarning = "This expense will exceed your budget for {$category->name} by $" . number_format($overspendAmount, 2);
+                    }
+                }
             }
         }
 
@@ -110,7 +129,12 @@ class TransactionController extends Controller
             }
         });
 
-        return redirect()->route('transactions.index')->with('success', 'Transaction created successfully.');
+        $successMessage = 'Transaction created successfully.';
+        if (isset($budgetWarning)) {
+            $successMessage .= ' Warning: ' . $budgetWarning;
+        }
+
+        return redirect()->route('transactions.index')->with('success', $successMessage);
     }
 
     /**

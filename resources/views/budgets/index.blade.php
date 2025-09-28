@@ -37,11 +37,22 @@
                         <div class="flex items-center justify-between mb-4">
                             <div>
                                 <h3 class="text-lg font-semibold">{{ $budget->name }}</h3>
-                                <p class="text-sm text-muted-foreground">{{ $budget->category->name }}</p>
+                                <p class="text-sm text-muted-foreground">
+                                    {{ $budget->category->name }}
+                                    @if($budget->is_limiter)
+                                        <span class="ml-2 px-2 py-0.5 text-xs bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 rounded">
+                                            Limiter
+                                        </span>
+                                    @endif
+                                </p>
                             </div>
                             @if($budget->is_exceeded)
                                 <span class="px-2 py-1 text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200 rounded-full">
-                                    Exceeded
+                                    @if($budget->overspending_amount > 0)
+                                        Overspent ${{ number_format($budget->overspending_amount, 2) }}
+                                    @else
+                                        Exceeded
+                                    @endif
                                 </span>
                             @else
                                 <span class="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 rounded-full">
@@ -63,12 +74,23 @@
                                     <span>Budget: ${{ number_format($budget->amount, 2) }}</span>
                                 </div>
                                 <div class="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
-                                    <div class="h-2 rounded-full {{ $budget->is_exceeded ? 'bg-red-600' : 'bg-green-600' }}" 
-                                         style="width: {{ min($budget->percentage_used, 100) }}%"></div>
+                                    @if($budget->is_exceeded && $budget->overspending_amount > 0)
+                                        <!-- Show budget portion -->
+                                        <div class="h-2 rounded-full bg-red-600" style="width: 100%"></div>
+                                        <!-- Show overspending -->
+                                        <div class="h-1 rounded-full bg-red-800 -mt-0.5" style="width: {{ min(($budget->overspending_amount / $budget->amount) * 100, 100) }}%"></div>
+                                    @else
+                                        <div class="h-2 rounded-full {{ $budget->is_exceeded ? 'bg-red-600' : 'bg-green-600' }}" 
+                                             style="width: {{ min($budget->percentage_used, 100) }}%"></div>
+                                    @endif
                                 </div>
                                 <div class="flex justify-between text-sm text-muted-foreground">
                                     <span>{{ number_format($budget->percentage_used, 1) }}% used</span>
-                                    <span>Remaining: ${{ number_format(max($budget->remaining_amount, 0), 2) }}</span>
+                                    @if($budget->is_exceeded && $budget->overspending_amount > 0)
+                                        <span class="text-red-600">Overspent: ${{ number_format($budget->overspending_amount, 2) }}</span>
+                                    @else
+                                        <span>Remaining: ${{ number_format(max($budget->remaining_amount, 0), 2) }}</span>
+                                    @endif
                                 </div>
                             </div>
 

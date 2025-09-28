@@ -18,12 +18,14 @@ class Budget extends Model
         'end_date',
         'name',
         'description',
+        'is_limiter',
     ];
 
     protected $casts = [
         'amount' => 'decimal:2',
         'start_date' => 'date',
         'end_date' => 'date',
+        'is_limiter' => 'boolean',
     ];
 
     /**
@@ -87,5 +89,21 @@ class Budget extends Model
     public function wouldExceedWith($amount)
     {
         return ($this->spent_amount + $amount) > $this->amount;
+    }
+
+    /**
+     * Get the overspending amount (positive if over budget).
+     */
+    public function getOverspendingAmountAttribute()
+    {
+        return max(0, $this->spent_amount - $this->amount);
+    }
+
+    /**
+     * Check if this budget acts as a spending limiter.
+     */
+    public function shouldPreventSpending()
+    {
+        return $this->is_limiter && $this->is_exceeded;
     }
 }

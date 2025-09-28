@@ -25,10 +25,11 @@ class CategoryController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(Request $request)
     {
         $typeOptions = Category::getTypeOptions();
-        return view('categories.create', compact('typeOptions'));
+        $defaultType = $request->get('type', 'expense'); // Default to expense if type parameter is provided
+        return view('categories.create', compact('typeOptions', 'defaultType'));
     }
 
     /**
@@ -41,6 +42,7 @@ class CategoryController extends Controller
             'type' => 'required|in:income,expense',
             'description' => 'nullable|string|max:500',
             'color' => 'required|string|regex:/^#?[A-Fa-f0-9]{6}$/',
+            'is_default' => 'boolean',
         ]);
 
         // Ensure color starts with #
@@ -49,13 +51,28 @@ class CategoryController extends Controller
             $color = '#' . $color;
         }
 
-        \App\Models\Category::create([
+        $category = \App\Models\Category::create([
             'user_id' => Auth::id(),
             'name' => $request->name,
             'type' => $request->type,
             'description' => $request->description,
             'color' => $color,
+            'is_default' => $request->boolean('is_default'),
         ]);
+
+        // If this is set as default, remove default from other categories of same type
+        if ($request->boolean('is_default')) {
+            $category->setAsDefault();
+        }
+
+        // Check if this is an AJAX request
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'category' => $category,
+                'message' => 'Category created successfully.'
+            ]);
+        }
 
         return redirect()->route('categories.index')->with('success', 'Category created successfully.');
     }
@@ -111,6 +128,7 @@ class CategoryController extends Controller
             'type' => 'required|in:income,expense',
             'description' => 'nullable|string|max:500',
             'color' => 'required|string|regex:/^#?[A-Fa-f0-9]{6}$/',
+            'is_default' => 'boolean',
         ]);
 
         // Ensure color starts with #
@@ -124,7 +142,13 @@ class CategoryController extends Controller
             'type' => $request->type,
             'description' => $request->description,
             'color' => $color,
+            'is_default' => $request->boolean('is_default'),
         ]);
+
+        // If this is set as default, remove default from other categories of same type
+        if ($request->boolean('is_default')) {
+            $category->setAsDefault();
+        }
 
         return redirect()->route('categories.index')->with('success', 'Category updated successfully.');
     }

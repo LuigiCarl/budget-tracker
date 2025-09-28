@@ -55,7 +55,7 @@
                             </label>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <label class="relative">
-                                    <input type="radio" name="type" value="income" class="sr-only peer" {{ old('type') === 'income' ? 'checked' : '' }}>
+                                    <input type="radio" name="type" value="income" class="sr-only peer" {{ (old('type') ?: $defaultType) === 'income' ? 'checked' : '' }}>
                                     <div class="p-4 border-2 border-gray-300 rounded-lg cursor-pointer peer-checked:border-green-500 peer-checked:bg-green-50 dark:peer-checked:bg-green-900/20 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
                                         <div class="flex items-center space-x-3">
                                             <div class="p-2 bg-green-100 dark:bg-green-900/30 rounded-full">
@@ -71,7 +71,7 @@
                                     </div>
                                 </label>
                                 <label class="relative">
-                                    <input type="radio" name="type" value="expense" class="sr-only peer" {{ old('type') === 'expense' ? 'checked' : '' }}>
+                                    <input type="radio" name="type" value="expense" class="sr-only peer" {{ (old('type') ?: $defaultType) === 'expense' ? 'checked' : '' }}>
                                     <div class="p-4 border-2 border-gray-300 rounded-lg cursor-pointer peer-checked:border-red-500 peer-checked:bg-red-50 dark:peer-checked:bg-red-900/20 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
                                         <div class="flex items-center space-x-3">
                                             <div class="p-2 bg-red-100 dark:bg-red-900/30 rounded-full">
@@ -126,6 +126,27 @@
                                       rows="3"
                                       class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
                                       placeholder="Optional description for this category">{{ old('description') }}</textarea>
+                        </div>
+
+                        <!-- Default Category -->
+                        <div class="flex items-start">
+                            <div class="flex items-center h-5">
+                                <input type="checkbox" 
+                                       name="is_default" 
+                                       id="is_default" 
+                                       value="1"
+                                       {{ old('is_default') ? 'checked' : '' }}
+                                       class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-600">
+                            </div>
+                            <div class="ml-3">
+                                <label for="is_default" class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    Set as default category
+                                </label>
+                                <div class="text-sm text-gray-500 dark:text-gray-400">
+                                    <p class="mt-1">This category will be pre-selected when creating transactions and budgets of this type.</p>
+                                    <p class="mt-1">Only one category per type (income/expense) can be set as default.</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
