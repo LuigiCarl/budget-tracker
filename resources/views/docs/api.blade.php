@@ -6,6 +6,7 @@
 @section('sidebar')
 <div class="w-full" x-data="{ 
     authSection: true,
+    featuresSection: true,
     endpointsSection: true,
     testingSection: false 
 }">
@@ -27,6 +28,22 @@
             </a>
             <a href="#login" class="nav-link group flex w-full items-center rounded-md border border-transparent px-2 py-1 text-sm hover:bg-accent hover:text-accent-foreground text-muted-foreground">
                 User Login
+            </a>
+        </div>
+    </div>
+
+    <!-- New Features Section -->
+    <div class="pb-4">
+        <button @click="featuresSection = !featuresSection" 
+                class="flex w-full items-center justify-between rounded-md border border-transparent px-2 py-1 text-sm font-semibold hover:bg-accent hover:text-accent-foreground">
+            <span>🎉 New Features</span>
+            <svg class="h-3 w-3 transition-transform duration-200" :class="{ 'rotate-90': featuresSection }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+        </button>
+        <div x-show="featuresSection" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 -translate-y-2" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-2" class="ml-4 mt-2 space-y-1 border-l border-border pl-4">
+            <a href="#new-features" class="nav-link group flex w-full items-center rounded-md border border-transparent px-2 py-1 text-sm hover:bg-accent hover:text-accent-foreground text-muted-foreground">
+                Latest Updates (v1.2)
             </a>
         </div>
     </div>
@@ -257,6 +274,227 @@
                         </button>
                     </div>
                     <div id="tokenStatus" class="mt-2 text-sm"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Latest Features & CRUD Operations -->
+    <div class="mb-12">
+        <h2 id="new-features" class="scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight mb-6">
+            🎉 Latest Features & Updates
+        </h2>
+        
+        <div class="space-y-6">
+            <!-- Feature Highlights -->
+            <div class="rounded-lg border border-border bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 shadow-sm">
+                <div class="p-6">
+                    <div class="grid gap-4 sm:grid-cols-2">
+                        <div class="p-4 bg-white dark:bg-gray-800 rounded-lg border border-blue-200 dark:border-blue-800">
+                            <h3 class="font-semibold text-blue-700 dark:text-blue-300 mb-2">✅ CRUD Operations Optimization (v1.2)</h3>
+                            <ul class="text-sm text-blue-600 dark:text-blue-400 space-y-1">
+                                <li>• Fixed 403 authorization errors</li>
+                                <li>• Consistent user scoping pattern</li>
+                                <li>• Enhanced security with database-level isolation</li>
+                                <li>• Improved performance with direct queries</li>
+                            </ul>
+                        </div>
+                        <div class="p-4 bg-white dark:bg-gray-800 rounded-lg border border-purple-200 dark:border-purple-800">
+                            <h3 class="font-semibold text-purple-700 dark:text-purple-300 mb-2">✅ Enhanced Account Management (v1.2)</h3>
+                            <ul class="text-sm text-purple-600 dark:text-purple-400 space-y-1">
+                                <li>• Fixed balance field mapping issues</li>
+                                <li>• Improved form validation</li>
+                                <li>• Account details with transaction history</li>
+                                <li>• Mobile-responsive interface</li>
+                            </ul>
+                        </div>
+                        <div class="p-4 bg-white dark:bg-gray-800 rounded-lg border border-green-200 dark:border-green-800">
+                            <h3 class="font-semibold text-green-700 dark:text-green-300 mb-2">✅ Category Color System (v1.2)</h3>
+                            <ul class="text-sm text-green-600 dark:text-green-400 space-y-1">
+                                <li>• Flexible hex color input (with/without #)</li>
+                                <li>• Enhanced validation regex patterns</li>
+                                <li>• Custom color picker support</li>
+                                <li>• Visual consistency improvements</li>
+                            </ul>
+                        </div>
+                        <div class="p-4 bg-white dark:bg-gray-800 rounded-lg border border-orange-200 dark:border-orange-800">
+                            <h3 class="font-semibold text-orange-700 dark:text-orange-300 mb-2">✅ Dashboard Analytics (v1.1)</h3>
+                            <ul class="text-sm text-orange-600 dark:text-orange-400 space-y-1">
+                                <li>• Real-time financial statistics</li>
+                                <li>• Pie chart expense visualization</li>
+                                <li>• Budget progress tracking</li>
+                                <li>• Recent activity overview</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CRUD API Endpoints Overview -->
+            <div class="rounded-lg border border-border bg-card text-card-foreground shadow-sm">
+                <div class="p-6">
+                    <h3 class="text-xl font-semibold mb-4">📋 Complete CRUD API Endpoints</h3>
+                    <p class="text-muted-foreground mb-6">The Budget Tracker API now provides full CRUD operations for all financial entities with optimized user scoping and enhanced security.</p>
+                    
+                    <div class="space-y-6">
+                        <!-- Dashboard & Analytics -->
+                        <div class="border-l-4 border-purple-500 pl-4">
+                            <h4 class="text-lg font-semibold text-purple-700 dark:text-purple-300 mb-3">Dashboard & Analytics</h4>
+                            <div class="space-y-2">
+                                <div class="flex items-center gap-4 p-2 rounded hover:bg-muted/50">
+                                    <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded font-mono">GET</span>
+                                    <code class="text-sm">/api/dashboard</code>
+                                    <span class="text-sm text-muted-foreground">Get comprehensive financial analytics</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Account Management -->
+                        <div class="border-l-4 border-green-500 pl-4">
+                            <h4 class="text-lg font-semibold text-green-700 dark:text-green-300 mb-3">Account Management</h4>
+                            <div class="space-y-2">
+                                <div class="flex items-center gap-4 p-2 rounded hover:bg-muted/50">
+                                    <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded font-mono">GET</span>
+                                    <code class="text-sm">/api/accounts</code>
+                                    <span class="text-sm text-muted-foreground">List all user accounts</span>
+                                </div>
+                                <div class="flex items-center gap-4 p-2 rounded hover:bg-muted/50">
+                                    <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded font-mono">POST</span>
+                                    <code class="text-sm">/api/accounts</code>
+                                    <span class="text-sm text-muted-foreground">Create new account</span>
+                                </div>
+                                <div class="flex items-center gap-4 p-2 rounded hover:bg-muted/50">
+                                    <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded font-mono">GET</span>
+                                    <code class="text-sm">/api/accounts/{id}</code>
+                                    <span class="text-sm text-muted-foreground">Get account with transaction history</span>
+                                </div>
+                                <div class="flex items-center gap-4 p-2 rounded hover:bg-muted/50">
+                                    <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded font-mono">PUT</span>
+                                    <code class="text-sm">/api/accounts/{id}</code>
+                                    <span class="text-sm text-muted-foreground">Update account details</span>
+                                </div>
+                                <div class="flex items-center gap-4 p-2 rounded hover:bg-muted/50">
+                                    <span class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded font-mono">DELETE</span>
+                                    <code class="text-sm">/api/accounts/{id}</code>
+                                    <span class="text-sm text-muted-foreground">Delete account and transactions</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Category Management -->
+                        <div class="border-l-4 border-orange-500 pl-4">
+                            <h4 class="text-lg font-semibold text-orange-700 dark:text-orange-300 mb-3">Category Management</h4>
+                            <div class="space-y-2">
+                                <div class="flex items-center gap-4 p-2 rounded hover:bg-muted/50">
+                                    <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded font-mono">GET</span>
+                                    <code class="text-sm">/api/categories</code>
+                                    <span class="text-sm text-muted-foreground">List all categories with statistics</span>
+                                </div>
+                                <div class="flex items-center gap-4 p-2 rounded hover:bg-muted/50">
+                                    <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded font-mono">POST</span>
+                                    <code class="text-sm">/api/categories</code>
+                                    <span class="text-sm text-muted-foreground">Create category with color validation</span>
+                                </div>
+                                <div class="flex items-center gap-4 p-2 rounded hover:bg-muted/50">
+                                    <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded font-mono">GET</span>
+                                    <code class="text-sm">/api/categories/{id}</code>
+                                    <span class="text-sm text-muted-foreground">Get category with spending analytics</span>
+                                </div>
+                                <div class="flex items-center gap-4 p-2 rounded hover:bg-muted/50">
+                                    <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded font-mono">PUT</span>
+                                    <code class="text-sm">/api/categories/{id}</code>
+                                    <span class="text-sm text-muted-foreground">Update category and color</span>
+                                </div>
+                                <div class="flex items-center gap-4 p-2 rounded hover:bg-muted/50">
+                                    <span class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded font-mono">DELETE</span>
+                                    <code class="text-sm">/api/categories/{id}</code>
+                                    <span class="text-sm text-muted-foreground">Delete category</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Transaction Management -->
+                        <div class="border-l-4 border-indigo-500 pl-4">
+                            <h4 class="text-lg font-semibold text-indigo-700 dark:text-indigo-300 mb-3">Transaction Management</h4>
+                            <div class="space-y-2">
+                                <div class="flex items-center gap-4 p-2 rounded hover:bg-muted/50">
+                                    <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded font-mono">GET</span>
+                                    <code class="text-sm">/api/transactions</code>
+                                    <span class="text-sm text-muted-foreground">List with filtering and pagination</span>
+                                </div>
+                                <div class="flex items-center gap-4 p-2 rounded hover:bg-muted/50">
+                                    <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded font-mono">POST</span>
+                                    <code class="text-sm">/api/transactions</code>
+                                    <span class="text-sm text-muted-foreground">Create with account/category validation</span>
+                                </div>
+                                <div class="flex items-center gap-4 p-2 rounded hover:bg-muted/50">
+                                    <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded font-mono">GET</span>
+                                    <code class="text-sm">/api/transactions/{id}</code>
+                                    <span class="text-sm text-muted-foreground">Get transaction with relationships</span>
+                                </div>
+                                <div class="flex items-center gap-4 p-2 rounded hover:bg-muted/50">
+                                    <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded font-mono">PUT</span>
+                                    <code class="text-sm">/api/transactions/{id}</code>
+                                    <span class="text-sm text-muted-foreground">Update transaction details</span>
+                                </div>
+                                <div class="flex items-center gap-4 p-2 rounded hover:bg-muted/50">
+                                    <span class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded font-mono">DELETE</span>
+                                    <code class="text-sm">/api/transactions/{id}</code>
+                                    <span class="text-sm text-muted-foreground">Delete transaction</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Budget Management -->
+                        <div class="border-l-4 border-pink-500 pl-4">
+                            <h4 class="text-lg font-semibold text-pink-700 dark:text-pink-300 mb-3">Budget Management</h4>
+                            <div class="space-y-2">
+                                <div class="flex items-center gap-4 p-2 rounded hover:bg-muted/50">
+                                    <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded font-mono">GET</span>
+                                    <code class="text-sm">/api/budgets</code>
+                                    <span class="text-sm text-muted-foreground">List budgets with progress tracking</span>
+                                </div>
+                                <div class="flex items-center gap-4 p-2 rounded hover:bg-muted/50">
+                                    <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded font-mono">POST</span>
+                                    <code class="text-sm">/api/budgets</code>
+                                    <span class="text-sm text-muted-foreground">Create budget with overlap validation</span>
+                                </div>
+                                <div class="flex items-center gap-4 p-2 rounded hover:bg-muted/50">
+                                    <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded font-mono">GET</span>
+                                    <code class="text-sm">/api/budgets/{id}</code>
+                                    <span class="text-sm text-muted-foreground">Get budget with spending details</span>
+                                </div>
+                                <div class="flex items-center gap-4 p-2 rounded hover:bg-muted/50">
+                                    <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded font-mono">PUT</span>
+                                    <code class="text-sm">/api/budgets/{id}</code>
+                                    <span class="text-sm text-muted-foreground">Update budget parameters</span>
+                                </div>
+                                <div class="flex items-center gap-4 p-2 rounded hover:bg-muted/50">
+                                    <span class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded font-mono">DELETE</span>
+                                    <code class="text-sm">/api/budgets/{id}</code>
+                                    <span class="text-sm text-muted-foreground">Delete budget</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Security & Performance Improvements -->
+                    <div class="mt-8 p-4 bg-green-50 dark:bg-green-950/30 rounded-lg border border-green-200 dark:border-green-800">
+                        <div class="flex items-start">
+                            <svg class="w-5 h-5 text-green-600 dark:text-green-400 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <div>
+                                <p class="font-medium text-green-800 dark:text-green-200">Security & Performance Enhancements</p>
+                                <div class="text-sm text-green-700 dark:text-green-300 mt-1 space-y-1">
+                                    <p>• <strong>Database-level User Isolation:</strong> All queries scoped with <code>where('user_id', Auth::id())</code></p>
+                                    <p>• <strong>Enhanced Validation:</strong> Improved field validation and error handling</p>
+                                    <p>• <strong>Optimized Queries:</strong> Direct model queries instead of relationship traversal</p>
+                                    <p>• <strong>Consistent Error Responses:</strong> Standardized HTTP status codes and error messages</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
