@@ -16,7 +16,9 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        $categories = Auth::user()->categories()->withCount(['transactions', 'budgets'])->get();
+        $categories = \App\Models\Category::where('user_id', Auth::id())
+            ->withCount(['transactions', 'budgets'])
+            ->get();
         return view('categories.index', compact('categories'));
     }
 
@@ -38,10 +40,22 @@ class CategoryController extends Controller
             'name' => 'required|string|max:255',
             'type' => 'required|in:income,expense',
             'description' => 'nullable|string|max:500',
-            'color' => 'required|regex:/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/',
+            'color' => 'required|string|regex:/^#?[A-Fa-f0-9]{6}$/',
         ]);
 
-        Auth::user()->categories()->create($request->all());
+        // Ensure color starts with #
+        $color = $request->color;
+        if (!str_starts_with($color, '#')) {
+            $color = '#' . $color;
+        }
+
+        \App\Models\Category::create([
+            'user_id' => Auth::id(),
+            'name' => $request->name,
+            'type' => $request->type,
+            'description' => $request->description,
+            'color' => $color,
+        ]);
 
         return redirect()->route('categories.index')->with('success', 'Category created successfully.');
     }
@@ -49,27 +63,36 @@ class CategoryController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Category $category)
+    public function show($id)
     {
-        $this->authorize('view', $category);
+        // $this->authorize('view', $category);
+        $category = Category::where('user_id', Auth::id())->findOrFail($id);
         
-        $transactions = $category->transactions()
+        $category->loadCount('transactions');
+        
+        $recentTransactions = $category->transactions()
             ->with('account')
             ->orderBy('date', 'desc')
             ->orderBy('created_at', 'desc')
-            ->paginate(20);
+            ->limit(10)
+            ->get();
             
-        $budgets = $category->budgets()->orderBy('start_date', 'desc')->get();
+        $totalAmount = $category->transactions()->sum('amount');
+        $activeBudgets = $category->budgets()
+            ->where('start_date', '<=', now())
+            ->where('end_date', '>=', now())
+            ->count();
             
-        return view('categories.show', compact('category', 'transactions', 'budgets'));
+        return view('categories.show', compact('category', 'recentTransactions', 'totalAmount', 'activeBudgets'));
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Category $category)
+    public function edit($id)
     {
-        $this->authorize('update', $category);
+        // $this->authorize('update', $category);
+        $category = Category::where('user_id', Auth::id())->findOrFail($id);
         
         $typeOptions = Category::getTypeOptions();
         return view('categories.edit', compact('category', 'typeOptions'));
@@ -78,18 +101,30 @@ class CategoryController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Category $category)
+    public function update(Request $request, $id)
     {
-        $this->authorize('update', $category);
+        // $this->authorize('update', $category);
+        $category = Category::where('user_id', Auth::id())->findOrFail($id);
         
         $request->validate([
             'name' => 'required|string|max:255',
             'type' => 'required|in:income,expense',
             'description' => 'nullable|string|max:500',
-            'color' => 'required|regex:/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/',
+            'color' => 'required|string|regex:/^#?[A-Fa-f0-9]{6}$/',
         ]);
 
-        $category->update($request->all());
+        // Ensure color starts with #
+        $color = $request->color;
+        if (!str_starts_with($color, '#')) {
+            $color = '#' . $color;
+        }
+
+        $category->update([
+            'name' => $request->name,
+            'type' => $request->type,
+            'description' => $request->description,
+            'color' => $color,
+        ]);
 
         return redirect()->route('categories.index')->with('success', 'Category updated successfully.');
     }
@@ -97,9 +132,10 @@ class CategoryController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Category $category)
+    public function destroy($id)
     {
-        $this->authorize('delete', $category);
+        // $this->authorize('delete', $category);
+        $category = Category::where('user_id', Auth::id())->findOrFail($id);
         
         if ($category->transactions()->count() > 0) {
             return redirect()->route('categories.index')->with('error', 'Cannot delete category with existing transactions.');

@@ -15,7 +15,9 @@ class AccountController extends Controller
      */
     public function index()
     {
-        $accounts = Auth::user()->accounts()->withCount('transactions')->get();
+        $accounts = \App\Models\Account::where('user_id', Auth::id())
+            ->withCount('transactions')
+            ->get();
         return view('accounts.index', compact('accounts'));
     }
 
@@ -40,7 +42,13 @@ class AccountController extends Controller
             'description' => 'nullable|string|max:500',
         ]);
 
-        Auth::user()->accounts()->create($request->all());
+        \App\Models\Account::create([
+            'user_id' => Auth::id(),
+            'name' => $request->name,
+            'type' => $request->type,
+            'balance' => $request->balance,
+            'description' => $request->description,
+        ]);
 
         return redirect()->route('accounts.index')->with('success', 'Account created successfully.');
     }
@@ -48,9 +56,11 @@ class AccountController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Account $account)
+    public function show($id)
     {
-        $this->authorize('view', $account);
+        $account = \App\Models\Account::where('user_id', Auth::id())
+            ->with('transactions.category')
+            ->findOrFail($id);
         
         $transactions = $account->transactions()
             ->with('category')
@@ -64,9 +74,9 @@ class AccountController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Account $account)
+    public function edit($id)
     {
-        $this->authorize('update', $account);
+        $account = \App\Models\Account::where('user_id', Auth::id())->findOrFail($id);
         
         $typeOptions = Account::getTypeOptions();
         return view('accounts.edit', compact('account', 'typeOptions'));
@@ -75,9 +85,9 @@ class AccountController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Account $account)
+    public function update(Request $request, $id)
     {
-        $this->authorize('update', $account);
+        $account = \App\Models\Account::where('user_id', Auth::id())->findOrFail($id);
         
         $request->validate([
             'name' => 'required|string|max:255',
@@ -86,17 +96,22 @@ class AccountController extends Controller
             'description' => 'nullable|string|max:500',
         ]);
 
-        $account->update($request->all());
+        $account->update([
+            'name' => $request->name,
+            'type' => $request->type,
+            'balance' => $request->balance,
+            'description' => $request->description,
+        ]);
 
-        return redirect()->route('accounts.index')->with('success', 'Account updated successfully.');
+        return redirect()->route('accounts.show', $account)->with('success', 'Account updated successfully.');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Account $account)
+    public function destroy($id)
     {
-        $this->authorize('delete', $account);
+        $account = \App\Models\Account::where('user_id', Auth::id())->findOrFail($id);
         
         if ($account->transactions()->count() > 0) {
             return redirect()->route('accounts.index')->with('error', 'Cannot delete account with existing transactions.');

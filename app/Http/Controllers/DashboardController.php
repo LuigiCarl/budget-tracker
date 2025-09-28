@@ -22,12 +22,12 @@ class DashboardController extends Controller
         $endOfMonth = now()->endOfMonth();
         
         // Summary statistics
-        $totalIncome = $user->transactions()
+        $totalIncome = \App\Models\Transaction::where('user_id', Auth::id())
             ->where('type', 'income')
             ->whereBetween('date', [$startOfMonth, $endOfMonth])
             ->sum('amount');
             
-        $totalExpenses = $user->transactions()
+        $totalExpenses = \App\Models\Transaction::where('user_id', Auth::id())
             ->where('type', 'expense')
             ->whereBetween('date', [$startOfMonth, $endOfMonth])
             ->sum('amount');
@@ -35,10 +35,10 @@ class DashboardController extends Controller
         $netIncome = $totalIncome - $totalExpenses;
         
         // Account balances
-        $accounts = $user->accounts()->withCount('transactions')->get();
+        $accounts = \App\Models\Account::where('user_id', Auth::id())->withCount('transactions')->get();
         
         // Recent transactions
-        $recentTransactions = $user->transactions()
+        $recentTransactions = \App\Models\Transaction::where('user_id', Auth::id())
             ->with(['account', 'category'])
             ->orderBy('date', 'desc')
             ->orderBy('created_at', 'desc')
@@ -46,17 +46,19 @@ class DashboardController extends Controller
             ->get();
             
         // Expenses by category for current month
-        $expensesByCategory = $user->transactions()
-            ->select('category_id', DB::raw('SUM(amount) as total'))
-            ->with('category')
-            ->where('type', 'expense')
-            ->whereBetween('date', [$startOfMonth, $endOfMonth])
-            ->groupBy('category_id')
-            ->orderBy('total', 'desc')
+        $expensesByCategory = \App\Models\Category::where('user_id', Auth::id())
+            ->whereHas('transactions', function($query) use ($startOfMonth, $endOfMonth) {
+                $query->where('type', 'expense')
+                      ->whereBetween('date', [$startOfMonth, $endOfMonth]);
+            })
+            ->with(['transactions' => function($query) use ($startOfMonth, $endOfMonth) {
+                $query->where('type', 'expense')
+                      ->whereBetween('date', [$startOfMonth, $endOfMonth]);
+            }])
             ->get();
             
         // Active budgets with progress
-        $activeBudgets = $user->budgets()
+        $activeBudgets = \App\Models\Budget::where('user_id', Auth::id())
             ->with('category')
             ->where('start_date', '<=', now())
             ->where('end_date', '>=', now())
