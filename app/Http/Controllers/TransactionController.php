@@ -20,7 +20,7 @@ class TransactionController extends Controller
      */
     public function index()
     {
-        $transactions = Auth::user()->transactions()
+        $transactions = \App\Models\Transaction::where('user_id', Auth::id())
             ->with(['account', 'category'])
             ->orderBy('date', 'desc')
             ->orderBy('created_at', 'desc')
@@ -34,8 +34,8 @@ class TransactionController extends Controller
      */
     public function create()
     {
-        $accounts = Auth::user()->accounts()->get();
-        $categories = Auth::user()->categories()->get();
+        $accounts = \App\Models\Account::where('user_id', Auth::id())->get();
+        $categories = \App\Models\Category::where('user_id', Auth::id())->get();
         
         if ($accounts->isEmpty()) {
             return redirect()->route('accounts.create')
@@ -66,8 +66,8 @@ class TransactionController extends Controller
         ]);
 
         // Verify that the account and category belong to the authenticated user
-        $account = Auth::user()->accounts()->findOrFail($request->account_id);
-        $category = Auth::user()->categories()->findOrFail($request->category_id);
+        $account = \App\Models\Account::where('user_id', Auth::id())->findOrFail($request->account_id);
+        $category = \App\Models\Category::where('user_id', Auth::id())->findOrFail($request->category_id);
 
         // Verify category type matches transaction type
         if ($category->type !== $request->type) {
@@ -91,7 +91,16 @@ class TransactionController extends Controller
 
         DB::transaction(function () use ($request, $account) {
             // Create the transaction
-            $transaction = Auth::user()->transactions()->create($request->all());
+            $transaction = \App\Models\Transaction::create([
+                'user_id' => Auth::id(),
+                'account_id' => $request->account_id,
+                'category_id' => $request->category_id,
+                'type' => $request->type,
+                'amount' => $request->amount,
+                'date' => $request->date,
+                'description' => $request->description,
+                'note' => $request->note,
+            ]);
 
             // Update account balance
             if ($request->type === 'income') {
@@ -107,9 +116,12 @@ class TransactionController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Transaction $transaction)
+    public function show($id)
     {
-        $this->authorize('view', $transaction);
+        // $this->authorize('view', $transaction);
+        $transaction = \App\Models\Transaction::where('user_id', Auth::id())
+            ->with(['account', 'category'])
+            ->findOrFail($id);
         
         return view('transactions.show', compact('transaction'));
     }
@@ -117,12 +129,13 @@ class TransactionController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Transaction $transaction)
+    public function edit($id)
     {
-        $this->authorize('update', $transaction);
+        // $this->authorize('update', $transaction);
+        $transaction = \App\Models\Transaction::where('user_id', Auth::id())->findOrFail($id);
         
-        $accounts = Auth::user()->accounts()->get();
-        $categories = Auth::user()->categories()->get();
+        $accounts = \App\Models\Account::where('user_id', Auth::id())->get();
+        $categories = \App\Models\Category::where('user_id', Auth::id())->get();
         
         return view('transactions.edit', compact('transaction', 'accounts', 'categories'));
     }
@@ -130,9 +143,10 @@ class TransactionController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Transaction $transaction)
+    public function update(Request $request, $id)
     {
-        $this->authorize('update', $transaction);
+        // $this->authorize('update', $transaction);
+        $transaction = \App\Models\Transaction::where('user_id', Auth::id())->findOrFail($id);
         
         $request->validate([
             'account_id' => 'required|exists:accounts,id',
@@ -145,8 +159,8 @@ class TransactionController extends Controller
         ]);
 
         // Verify that the account and category belong to the authenticated user
-        $account = Auth::user()->accounts()->findOrFail($request->account_id);
-        $category = Auth::user()->categories()->findOrFail($request->category_id);
+        $account = \App\Models\Account::where('user_id', Auth::id())->findOrFail($request->account_id);
+        $category = \App\Models\Category::where('user_id', Auth::id())->findOrFail($request->category_id);
 
         // Verify category type matches transaction type
         if ($category->type !== $request->type) {
@@ -179,9 +193,10 @@ class TransactionController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Transaction $transaction)
+    public function destroy($id)
     {
-        $this->authorize('delete', $transaction);
+        // $this->authorize('delete', $transaction);
+        $transaction = \App\Models\Transaction::where('user_id', Auth::id())->findOrFail($id);
         
         DB::transaction(function () use ($transaction) {
             // Reverse the transaction's effect on account balance

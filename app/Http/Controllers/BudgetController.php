@@ -18,7 +18,7 @@ class BudgetController extends Controller
      */
     public function index()
     {
-        $budgets = Auth::user()->budgets()
+        $budgets = \App\Models\Budget::where('user_id', Auth::id())
             ->with('category')
             ->orderBy('start_date', 'desc')
             ->paginate(15);
@@ -31,13 +31,16 @@ class BudgetController extends Controller
      */
     public function create()
     {
-        $expenseCategories = Auth::user()->categories()
+        $expenseCategories = \App\Models\Category::where('user_id', Auth::id())
             ->where('type', 'expense')
             ->get();
             
         if ($expenseCategories->isEmpty()) {
-            return redirect()->route('categories.create')
-                ->with('error', 'You need to create at least one expense category before creating budgets.');
+            // Instead of redirecting, show a message and link to create categories
+            return view('budgets.create', [
+                'expenseCategories' => collect(),
+                'noCategories' => true
+            ]);
         }
         
         return view('budgets.create', compact('expenseCategories'));
@@ -57,31 +60,41 @@ class BudgetController extends Controller
             'description' => 'nullable|string|max:500',
         ]);
 
-        // Verify that the category belongs to the authenticated user and is an expense category
-        $category = Auth::user()->categories()
+                // Verify that the category belongs to the authenticated user and is an expense category
+        $category = \App\Models\Category::where('user_id', Auth::id())
             ->where('id', $request->category_id)
             ->where('type', 'expense')
-            ->firstOrFail();
-
-        // Check for overlapping budgets
-        $overlappingBudget = $category->budgets()
-            ->where(function ($query) use ($request) {
-                $query->whereBetween('start_date', [$request->start_date, $request->end_date])
-                    ->orWhereBetween('end_date', [$request->start_date, $request->end_date])
-                    ->orWhere(function ($query) use ($request) {
-                        $query->where('start_date', '<=', $request->start_date)
-                            ->where('end_date', '>=', $request->end_date);
-                    });
-            })
-            ->exists();
-
-        if ($overlappingBudget) {
-            return back()->withErrors([
-                'start_date' => 'This date range overlaps with an existing budget for this category.'
-            ]);
+            ->first();
+            
+        if (!$category) {
+            return redirect()->back()->withInput()->with('error', 'Invalid category selected.');
         }
 
-        Auth::user()->budgets()->create($request->all());
+        // Check for overlapping budgets for the same category
+        $overlapping = \App\Models\Budget::where('user_id', Auth::id())
+            ->where('category_id', $request->category_id)
+            ->where(function($query) use ($request) {
+                $query->whereBetween('start_date', [$request->start_date, $request->end_date])
+                      ->orWhereBetween('end_date', [$request->start_date, $request->end_date])
+                      ->orWhere(function($subQuery) use ($request) {
+                          $subQuery->where('start_date', '<=', $request->start_date)
+                                   ->where('end_date', '>=', $request->end_date);
+                      });
+            })->exists();
+            
+        if ($overlapping) {
+            return redirect()->back()->withInput()->with('error', 'A budget for this category already exists in the selected time period.');
+        }
+
+        \App\Models\Budget::create([
+            'user_id' => Auth::id(),
+            'category_id' => $request->category_id,
+            'name' => $request->name,
+            'amount' => $request->amount,
+            'start_date' => $request->start_date,
+            'end_date' => $request->end_date,
+            'description' => $request->description,
+        ]);
 
         return redirect()->route('budgets.index')->with('success', 'Budget created successfully.');
     }
@@ -89,9 +102,10 @@ class BudgetController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Budget $budget)
+    public function show($id)
     {
-        $this->authorize('view', $budget);
+        // $this->authorize('view', $budget);
+        $budget = Budget::where('user_id', Auth::id())->findOrFail($id);
         
         $transactions = $budget->category->transactions()
             ->where('type', 'expense')
@@ -106,11 +120,12 @@ class BudgetController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Budget $budget)
+    public function edit($id)
     {
-        $this->authorize('update', $budget);
+        // $this->authorize('update', $budget);
+        $budget = \App\Models\Budget::where('user_id', Auth::id())->findOrFail($id);
         
-        $expenseCategories = Auth::user()->categories()
+        $expenseCategories = \App\Models\Category::where('user_id', Auth::id())
             ->where('type', 'expense')
             ->get();
             
@@ -120,9 +135,10 @@ class BudgetController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Budget $budget)
+    public function update(Request $request, $id)
     {
-        $this->authorize('update', $budget);
+        // $this->authorize('update', $budget);
+        $budget = \App\Models\Budget::where('user_id', Auth::id())->findOrFail($id);
         
         $request->validate([
             'category_id' => 'required|exists:categories,id',
@@ -134,7 +150,7 @@ class BudgetController extends Controller
         ]);
 
         // Verify that the category belongs to the authenticated user and is an expense category
-        $category = Auth::user()->categories()
+        $category = \App\Models\Category::where('user_id', Auth::id())
             ->where('id', $request->category_id)
             ->where('type', 'expense')
             ->firstOrFail();
@@ -166,9 +182,10 @@ class BudgetController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Budget $budget)
+    public function destroy($id)
     {
-        $this->authorize('delete', $budget);
+        // $this->authorize('delete', $budget);
+        $budget = \App\Models\Budget::where('user_id', Auth::id())->findOrFail($id);
         
         $budget->delete();
 

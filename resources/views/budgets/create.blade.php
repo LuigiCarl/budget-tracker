@@ -18,6 +18,25 @@
             </a>
         </div>
 
+        @if (session('error'))
+            <div class="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+                {{ session('error') }}
+            </div>
+        @endif
+        
+        @if (isset($noCategories) && $noCategories)
+            <div class="mb-6 p-4 bg-yellow-100 border border-yellow-400 text-yellow-700 rounded-lg">
+                <h3 class="font-medium mb-2">No Expense Categories Found</h3>
+                <p class="mb-3">You need to create at least one expense category before you can create budgets.</p>
+                <a href="{{ route('categories.create') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                    Create Expense Category
+                </a>
+            </div>
+        @endif
+
         @if ($errors->any())
             <div class="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
                 <ul class="list-disc list-inside">
@@ -28,6 +47,7 @@
             </div>
         @endif
 
+        @if (!isset($noCategories) || !$noCategories)
         <div class="rounded-lg border border-border bg-card text-card-foreground shadow-sm">
             <div class="p-6">
                 <form action="{{ route('budgets.store') }}" method="POST">
@@ -138,5 +158,6 @@
                 </form>
             </div>
         </div>
+        @endif
     </div>
 @endsection
