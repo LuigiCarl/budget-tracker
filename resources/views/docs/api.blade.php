@@ -43,7 +43,7 @@
         </button>
         <div x-show="featuresSection" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 -translate-y-2" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-2" class="ml-4 mt-2 space-y-1 border-l border-border pl-4">
             <a href="#new-features" class="nav-link group flex w-full items-center rounded-md border border-transparent px-2 py-1 text-sm hover:bg-accent hover:text-accent-foreground text-muted-foreground">
-                Latest Updates (v1.2)
+                Latest Updates (v1.3)
             </a>
         </div>
     </div>
@@ -90,6 +90,13 @@
                 Code Examples
             </a>
         </div>
+    </div>
+
+    <!-- Future Development Section -->
+    <div class="pb-4">
+        <a href="#future-development" class="nav-link flex w-full items-center rounded-md border border-transparent px-2 py-1 text-sm font-semibold hover:bg-accent hover:text-accent-foreground">
+            <span>🚧 Future Development</span>
+        </a>
     </div>
 </div>
 @endsection
@@ -318,12 +325,13 @@
                             </ul>
                         </div>
                         <div class="p-4 bg-white dark:bg-gray-800 rounded-lg border border-orange-200 dark:border-orange-800">
-                            <h3 class="font-semibold text-orange-700 dark:text-orange-300 mb-2">✅ Dashboard Analytics (v1.1)</h3>
+                            <h3 class="font-semibold text-orange-700 dark:text-orange-300 mb-2">✅ Advanced Analytics API (v1.3)</h3>
                             <ul class="text-sm text-orange-600 dark:text-orange-400 space-y-1">
-                                <li>• Real-time financial statistics</li>
-                                <li>• Pie chart expense visualization</li>
-                                <li>• Budget progress tracking</li>
-                                <li>• Recent activity overview</li>
+                                <li>• Dashboard with comprehensive financial summary</li>
+                                <li>• Monthly analytics with year comparison</li>
+                                <li>• Spending trends analysis (30/90/365 days)</li>
+                                <li>• Category breakdown with percentages</li>
+                                <li>• Budget performance metrics & projections</li>
                             </ul>
                         </div>
                     </div>
@@ -345,6 +353,26 @@
                                     <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded font-mono">GET</span>
                                     <code class="text-sm">/api/dashboard</code>
                                     <span class="text-sm text-muted-foreground">Get comprehensive financial analytics</span>
+                                </div>
+                                <div class="flex items-center gap-4 p-2 rounded hover:bg-muted/50">
+                                    <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded font-mono">GET</span>
+                                    <code class="text-sm">/api/analytics/monthly?year={year}</code>
+                                    <span class="text-sm text-muted-foreground">Month-by-month comparison for a year</span>
+                                </div>
+                                <div class="flex items-center gap-4 p-2 rounded hover:bg-muted/50">
+                                    <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded font-mono">GET</span>
+                                    <code class="text-sm">/api/analytics/trends?period={30|90|365}</code>
+                                    <span class="text-sm text-muted-foreground">Spending trends over period</span>
+                                </div>
+                                <div class="flex items-center gap-4 p-2 rounded hover:bg-muted/50">
+                                    <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded font-mono">GET</span>
+                                    <code class="text-sm">/api/analytics/category-breakdown?month={YYYY-MM}</code>
+                                    <span class="text-sm text-muted-foreground">Detailed category spending breakdown</span>
+                                </div>
+                                <div class="flex items-center gap-4 p-2 rounded hover:bg-muted/50">
+                                    <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded font-mono">GET</span>
+                                    <code class="text-sm">/api/analytics/budget-performance</code>
+                                    <span class="text-sm text-muted-foreground">Budget adherence metrics and projections</span>
                                 </div>
                             </div>
                         </div>
@@ -1026,6 +1054,258 @@ curl -X PUT {{ url('/api/profile') }} \
     "name": "John Doe Updated",
     "email": "john.updated@example.com"
   }'</code></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Future Development Section -->
+    <div class="mb-12">
+        <h2 id="future-development" class="scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight mb-6">
+            🚧 Future Development
+        </h2>
+        
+        <div class="rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30 text-card-foreground shadow-sm mb-6">
+            <div class="p-6">
+                <div class="flex items-start space-x-3">
+                    <div class="flex-shrink-0">
+                        <svg class="h-6 w-6 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-amber-900 dark:text-amber-100 mb-2">Planned Features & Enhancements</h3>
+                        <p class="text-sm text-amber-800 dark:text-amber-200">
+                            The following endpoints and features are planned for future releases. These will enhance the analytics and reporting capabilities of the Budget Tracker API.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="space-y-6">
+            <!-- Advanced Analytics -->
+            <div class="rounded-lg border border-border bg-card text-card-foreground shadow-sm">
+                <div class="p-6">
+                    <h3 class="text-xl font-semibold mb-4 flex items-center gap-2">
+                        <span class="text-2xl">📊</span>
+                        Advanced Analytics Endpoints
+                    </h3>
+                    <div class="space-y-3 ml-8">
+                        <div class="flex items-start gap-3">
+                            <span class="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 text-xs px-2 py-1 rounded font-mono">GET</span>
+                            <div>
+                                <code class="text-sm font-semibold">/api/analytics/income-vs-expense</code>
+                                <p class="text-sm text-muted-foreground mt-1">Custom date range comparison with visual data (start={date}&end={date})</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <span class="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 text-xs px-2 py-1 rounded font-mono">GET</span>
+                            <div>
+                                <code class="text-sm font-semibold">/api/analytics/account-history/{id}</code>
+                                <p class="text-sm text-muted-foreground mt-1">Account balance history over time with trend analysis</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <span class="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 text-xs px-2 py-1 rounded font-mono">GET</span>
+                            <div>
+                                <code class="text-sm font-semibold">/api/analytics/savings-rate</code>
+                                <p class="text-sm text-muted-foreground mt-1">Calculate savings rate and financial health metrics</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <span class="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 text-xs px-2 py-1 rounded font-mono">GET</span>
+                            <div>
+                                <code class="text-sm font-semibold">/api/analytics/forecast</code>
+                                <p class="text-sm text-muted-foreground mt-1">AI-powered spending forecast and predictions</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Export -->
+            <div class="rounded-lg border border-border bg-card text-card-foreground shadow-sm">
+                <div class="p-6">
+                    <h3 class="text-xl font-semibold mb-4 flex items-center gap-2">
+                        <span class="text-2xl">📥</span>
+                        Data Export & Reporting
+                    </h3>
+                    <div class="space-y-3 ml-8">
+                        <div class="flex items-start gap-3">
+                            <span class="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 text-xs px-2 py-1 rounded font-mono">GET</span>
+                            <div>
+                                <code class="text-sm font-semibold">/api/export/transactions</code>
+                                <p class="text-sm text-muted-foreground mt-1">Export transactions to CSV, Excel, or PDF formats</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <span class="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 text-xs px-2 py-1 rounded font-mono">GET</span>
+                            <div>
+                                <code class="text-sm font-semibold">/api/reports/monthly-summary</code>
+                                <p class="text-sm text-muted-foreground mt-1">Generate comprehensive monthly financial reports</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <span class="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 text-xs px-2 py-1 rounded font-mono">GET</span>
+                            <div>
+                                <code class="text-sm font-semibold">/api/reports/tax-summary</code>
+                                <p class="text-sm text-muted-foreground mt-1">Tax-ready report with categorized deductions</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recurring Transactions -->
+            <div class="rounded-lg border border-border bg-card text-card-foreground shadow-sm">
+                <div class="p-6">
+                    <h3 class="text-xl font-semibold mb-4 flex items-center gap-2">
+                        <span class="text-2xl">🔄</span>
+                        Recurring Transactions
+                    </h3>
+                    <div class="space-y-3 ml-8">
+                        <div class="flex items-start gap-3">
+                            <span class="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 text-xs px-2 py-1 rounded font-mono">POST</span>
+                            <div>
+                                <code class="text-sm font-semibold">/api/recurring-transactions</code>
+                                <p class="text-sm text-muted-foreground mt-1">Create recurring/scheduled transactions (daily, weekly, monthly)</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <span class="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 text-xs px-2 py-1 rounded font-mono">GET</span>
+                            <div>
+                                <code class="text-sm font-semibold">/api/recurring-transactions</code>
+                                <p class="text-sm text-muted-foreground mt-1">List all recurring transaction schedules</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <span class="bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200 text-xs px-2 py-1 rounded font-mono">PUT</span>
+                            <div>
+                                <code class="text-sm font-semibold">/api/recurring-transactions/{id}</code>
+                                <p class="text-sm text-muted-foreground mt-1">Update or pause recurring schedules</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Financial Goals -->
+            <div class="rounded-lg border border-border bg-card text-card-foreground shadow-sm">
+                <div class="p-6">
+                    <h3 class="text-xl font-semibold mb-4 flex items-center gap-2">
+                        <span class="text-2xl">🎯</span>
+                        Financial Goals & Savings
+                    </h3>
+                    <div class="space-y-3 ml-8">
+                        <div class="flex items-start gap-3">
+                            <span class="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 text-xs px-2 py-1 rounded font-mono">POST</span>
+                            <div>
+                                <code class="text-sm font-semibold">/api/goals</code>
+                                <p class="text-sm text-muted-foreground mt-1">Create savings goals with target amounts and deadlines</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <span class="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 text-xs px-2 py-1 rounded font-mono">GET</span>
+                            <div>
+                                <code class="text-sm font-semibold">/api/goals/progress</code>
+                                <p class="text-sm text-muted-foreground mt-1">Track progress towards financial goals</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notifications & Alerts -->
+            <div class="rounded-lg border border-border bg-card text-card-foreground shadow-sm">
+                <div class="p-6">
+                    <h3 class="text-xl font-semibold mb-4 flex items-center gap-2">
+                        <span class="text-2xl">🔔</span>
+                        Notifications & Alerts
+                    </h3>
+                    <div class="space-y-3 ml-8">
+                        <div class="flex items-start gap-3">
+                            <span class="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 text-xs px-2 py-1 rounded font-mono">GET</span>
+                            <div>
+                                <code class="text-sm font-semibold">/api/notifications</code>
+                                <p class="text-sm text-muted-foreground mt-1">Get budget alerts, bill reminders, and anomaly detection</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <span class="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 text-xs px-2 py-1 rounded font-mono">POST</span>
+                            <div>
+                                <code class="text-sm font-semibold">/api/notifications/preferences</code>
+                                <p class="text-sm text-muted-foreground mt-1">Configure notification settings and alert thresholds</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Multi-Currency Support -->
+            <div class="rounded-lg border border-border bg-card text-card-foreground shadow-sm">
+                <div class="p-6">
+                    <h3 class="text-xl font-semibold mb-4 flex items-center gap-2">
+                        <span class="text-2xl">💱</span>
+                        Multi-Currency & Exchange Rates
+                    </h3>
+                    <div class="space-y-3 ml-8">
+                        <div class="flex items-start gap-3">
+                            <span class="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 text-xs px-2 py-1 rounded font-mono">GET</span>
+                            <div>
+                                <code class="text-sm font-semibold">/api/exchange-rates</code>
+                                <p class="text-sm text-muted-foreground mt-1">Real-time currency conversion and historical rates</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <span class="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 text-xs px-2 py-1 rounded font-mono">GET</span>
+                            <div>
+                                <code class="text-sm font-semibold">/api/dashboard/consolidated</code>
+                                <p class="text-sm text-muted-foreground mt-1">View all accounts in a single base currency</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Webhooks -->
+            <div class="rounded-lg border border-border bg-card text-card-foreground shadow-sm">
+                <div class="p-6">
+                    <h3 class="text-xl font-semibold mb-4 flex items-center gap-2">
+                        <span class="text-2xl">🔗</span>
+                        Webhooks & Integrations
+                    </h3>
+                    <div class="space-y-3 ml-8">
+                        <div class="flex items-start gap-3">
+                            <span class="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 text-xs px-2 py-1 rounded font-mono">POST</span>
+                            <div>
+                                <code class="text-sm font-semibold">/api/webhooks</code>
+                                <p class="text-sm text-muted-foreground mt-1">Register webhooks for transaction events and budget alerts</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <span class="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 text-xs px-2 py-1 rounded font-mono">GET</span>
+                            <div>
+                                <code class="text-sm font-semibold">/api/integrations/bank-import</code>
+                                <p class="text-sm text-muted-foreground mt-1">Import transactions from bank statements (OFX, QFX, CSV)</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Timeline -->
+            <div class="rounded-lg border border-purple-200 dark:border-purple-800 bg-purple-50 dark:bg-purple-950/30 text-card-foreground shadow-sm">
+                <div class="p-6">
+                    <h3 class="text-lg font-semibold text-purple-900 dark:text-purple-100 mb-3">📅 Development Timeline</h3>
+                    <div class="space-y-2 text-sm text-purple-800 dark:text-purple-200">
+                        <p><strong>v2.0 (Q1 2026):</strong> Advanced Analytics, Data Export, Recurring Transactions</p>
+                        <p><strong>v2.1 (Q2 2026):</strong> Financial Goals, Notifications, Multi-Currency</p>
+                        <p><strong>v2.2 (Q3 2026):</strong> Webhooks, Bank Imports, AI Forecasting</p>
+                    </div>
+                    <p class="text-xs text-purple-700 dark:text-purple-300 mt-4">
+                        <em>Timeline subject to change. Follow our GitHub repository for the latest updates.</em>
+                    </p>
                 </div>
             </div>
         </div>

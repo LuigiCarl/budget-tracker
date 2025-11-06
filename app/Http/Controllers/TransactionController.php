@@ -118,7 +118,6 @@ class TransactionController extends Controller
                 'amount' => $request->amount,
                 'date' => $request->date,
                 'description' => $request->description,
-                'note' => $request->note,
             ]);
 
             // Update account balance
@@ -179,7 +178,6 @@ class TransactionController extends Controller
             'type' => 'required|in:income,expense',
             'date' => 'required|date',
             'description' => 'nullable|string|max:255',
-            'note' => 'nullable|string|max:1000',
         ]);
 
         // Verify that the account and category belong to the authenticated user
@@ -201,7 +199,14 @@ class TransactionController extends Controller
             }
 
             // Update the transaction
-            $transaction->update($request->all());
+            $transaction->update([
+                'account_id' => $request->account_id,
+                'category_id' => $request->category_id,
+                'type' => $request->type,
+                'amount' => $request->amount,
+                'date' => $request->date,
+                'description' => $request->description,
+            ]);
 
             // Apply the new transaction's effect on account balance
             if ($request->type === 'income') {
