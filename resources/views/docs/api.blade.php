@@ -7,7 +7,11 @@
 <div class="w-full" x-data="{ 
     authSection: true,
     featuresSection: true,
-    endpointsSection: true,
+    userSection: true,
+    accountSection: false,
+    categorySection: false,
+    transactionSection: false,
+    budgetSection: false,
     testingSection: false 
 }">
     <!-- Authentication Section -->
@@ -22,12 +26,6 @@
         <div x-show="authSection" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 -translate-y-2" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-2" class="ml-4 mt-2 space-y-1 border-l border-border pl-4">
             <a href="#token-auth" class="nav-link group flex w-full items-center rounded-md border border-transparent px-2 py-1 text-sm hover:bg-accent hover:text-accent-foreground text-muted-foreground">
                 Token Setup
-            </a>
-            <a href="#register" class="nav-link group flex w-full items-center rounded-md border border-transparent px-2 py-1 text-sm hover:bg-accent hover:text-accent-foreground text-muted-foreground">
-                User Registration
-            </a>
-            <a href="#login" class="nav-link group flex w-full items-center rounded-md border border-transparent px-2 py-1 text-sm hover:bg-accent hover:text-accent-foreground text-muted-foreground">
-                User Login
             </a>
         </div>
     </div>
@@ -48,16 +46,22 @@
         </div>
     </div>
 
-    <!-- API Endpoints Section -->
+    <!-- User Management Section -->
     <div class="pb-4">
-        <button @click="endpointsSection = !endpointsSection" 
+        <button @click="userSection = !userSection" 
                 class="flex w-full items-center justify-between rounded-md border border-transparent px-2 py-1 text-sm font-semibold hover:bg-accent hover:text-accent-foreground">
-            <span>🚀 API Endpoints</span>
-            <svg class="h-3 w-3 transition-transform duration-200" :class="{ 'rotate-90': endpointsSection }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <span>👤 User Management</span>
+            <svg class="h-3 w-3 transition-transform duration-200" :class="{ 'rotate-90': userSection }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
             </svg>
         </button>
-        <div x-show="endpointsSection" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 -translate-y-2" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-2" class="ml-4 mt-2 space-y-1 border-l border-border pl-4">
+        <div x-show="userSection" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 -translate-y-2" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-2" class="ml-4 mt-2 space-y-1 border-l border-border pl-4">
+            <a href="#register" class="nav-link group flex w-full items-center rounded-md border border-transparent px-2 py-1 text-sm hover:bg-accent hover:text-accent-foreground text-muted-foreground">
+                User Registration
+            </a>
+            <a href="#login" class="nav-link group flex w-full items-center rounded-md border border-transparent px-2 py-1 text-sm hover:bg-accent hover:text-accent-foreground text-muted-foreground">
+                User Login
+            </a>
             <a href="#get-user" class="nav-link group flex w-full items-center rounded-md border border-transparent px-2 py-1 text-sm hover:bg-accent hover:text-accent-foreground text-muted-foreground">
                 Get User Profile
             </a>
@@ -69,6 +73,103 @@
             </a>
             <a href="#logout" class="nav-link group flex w-full items-center rounded-md border border-transparent px-2 py-1 text-sm hover:bg-accent hover:text-accent-foreground text-muted-foreground">
                 Logout
+            </a>
+            <a href="#delete-account" class="nav-link group flex w-full items-center rounded-md border border-transparent px-2 py-1 text-sm hover:bg-accent hover:text-accent-foreground text-muted-foreground">
+                Delete Account
+            </a>
+        </div>
+    </div>
+
+    <!-- Account Management Section -->
+    <div class="pb-4">
+        <button @click="accountSection = !accountSection" 
+                class="flex w-full items-center justify-between rounded-md border border-transparent px-2 py-1 text-sm font-semibold hover:bg-accent hover:text-accent-foreground">
+            <span>💳 Account Management</span>
+            <svg class="h-3 w-3 transition-transform duration-200" :class="{ 'rotate-90': accountSection }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+        </button>
+        <div x-show="accountSection" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 -translate-y-2" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-2" class="ml-4 mt-2 space-y-1 border-l border-border pl-4">
+            <a href="#account-management" class="nav-link group flex w-full items-center rounded-md border border-transparent px-2 py-1 text-sm hover:bg-accent hover:text-accent-foreground text-muted-foreground">
+                List All Accounts
+            </a>
+            <a href="#account-management" class="nav-link group flex w-full items-center rounded-md border border-transparent px-2 py-1 text-sm hover:bg-accent hover:text-accent-foreground text-muted-foreground">
+                Create New Account
+            </a>
+            <a href="#account-management" class="nav-link group flex w-full items-center rounded-md border border-transparent px-2 py-1 text-sm hover:bg-accent hover:text-accent-foreground text-muted-foreground">
+                Get Account Details
+            </a>
+            <a href="#account-management" class="nav-link group flex w-full items-center rounded-md border border-transparent px-2 py-1 text-sm hover:bg-accent hover:text-accent-foreground text-muted-foreground">
+                Update Account
+            </a>
+            <a href="#account-management" class="nav-link group flex w-full items-center rounded-md border border-transparent px-2 py-1 text-sm hover:bg-accent hover:text-accent-foreground text-muted-foreground">
+                Delete Account
+            </a>
+        </div>
+    </div>
+
+    <!-- Category Management Section -->
+    <div class="pb-4">
+        <button @click="categorySection = !categorySection" 
+                class="flex w-full items-center justify-between rounded-md border border-transparent px-2 py-1 text-sm font-semibold hover:bg-accent hover:text-accent-foreground">
+            <span>🏷️ Category Management</span>
+            <svg class="h-3 w-3 transition-transform duration-200" :class="{ 'rotate-90': categorySection }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+        </button>
+        <div x-show="categorySection" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 -translate-y-2" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-2" class="ml-4 mt-2 space-y-1 border-l border-border pl-4">
+            <a href="#category-management" class="nav-link group flex w-full items-center rounded-md border border-transparent px-2 py-1 text-sm hover:bg-accent hover:text-accent-foreground text-muted-foreground">
+                List All Categories
+            </a>
+            <a href="#category-management" class="nav-link group flex w-full items-center rounded-md border border-transparent px-2 py-1 text-sm hover:bg-accent hover:text-accent-foreground text-muted-foreground">
+                Create New Category
+            </a>
+            <a href="#category-management" class="nav-link group flex w-full items-center rounded-md border border-transparent px-2 py-1 text-sm hover:bg-accent hover:text-accent-foreground text-muted-foreground">
+                Get Category Analytics
+            </a>
+        </div>
+    </div>
+
+    <!-- Transaction Management Section -->
+    <div class="pb-4">
+        <button @click="transactionSection = !transactionSection" 
+                class="flex w-full items-center justify-between rounded-md border border-transparent px-2 py-1 text-sm font-semibold hover:bg-accent hover:text-accent-foreground">
+            <span>💸 Transaction Management</span>
+            <svg class="h-3 w-3 transition-transform duration-200" :class="{ 'rotate-90': transactionSection }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+        </button>
+        <div x-show="transactionSection" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 -translate-y-2" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-2" class="ml-4 mt-2 space-y-1 border-l border-border pl-4">
+            <a href="#transaction-management" class="nav-link group flex w-full items-center rounded-md border border-transparent px-2 py-1 text-sm hover:bg-accent hover:text-accent-foreground text-muted-foreground">
+                List All Transactions
+            </a>
+            <a href="#transaction-management" class="nav-link group flex w-full items-center rounded-md border border-transparent px-2 py-1 text-sm hover:bg-accent hover:text-accent-foreground text-muted-foreground">
+                Create New Transaction
+            </a>
+        </div>
+    </div>
+
+    <!-- Budget Management Section -->
+    <div class="pb-4">
+        <button @click="budgetSection = !budgetSection" 
+                class="flex w-full items-center justify-between rounded-md border border-transparent px-2 py-1 text-sm font-semibold hover:bg-accent hover:text-accent-foreground">
+            <span>📊 Budget Management</span>
+            <svg class="h-3 w-3 transition-transform duration-200" :class="{ 'rotate-90': budgetSection }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+        </button>
+        <div x-show="budgetSection" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 -translate-y-2" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-2" class="ml-4 mt-2 space-y-1 border-l border-border pl-4">
+            <a href="#budget-management" class="nav-link group flex w-full items-center rounded-md border border-transparent px-2 py-1 text-sm hover:bg-accent hover:text-accent-foreground text-muted-foreground">
+                List All Budgets
+            </a>
+            <a href="#budget-create" class="nav-link group flex w-full items-center rounded-md border border-transparent px-2 py-1 text-sm hover:bg-accent hover:text-accent-foreground text-muted-foreground">
+                Create New Budget
+            </a>
+            <a href="#budget-update" class="nav-link group flex w-full items-center rounded-md border border-transparent px-2 py-1 text-sm hover:bg-accent hover:text-accent-foreground text-muted-foreground">
+                Update Budget
+            </a>
+            <a href="#budget-delete" class="nav-link group flex w-full items-center rounded-md border border-transparent px-2 py-1 text-sm hover:bg-accent hover:text-accent-foreground text-muted-foreground">
+                Delete Budget
             </a>
         </div>
     </div>
@@ -159,6 +260,34 @@
         color: hsl(var(--primary));
         font-weight: 500;
         border-left-color: hsl(var(--primary));
+    }
+
+    /* Navigation active states */
+    .nav-link {
+        position: relative;
+        transition: all 0.2s ease-in-out;
+    }
+    
+    .nav-link.active {
+        background: hsl(var(--accent));
+        color: hsl(var(--accent-foreground));
+        font-weight: 500;
+    }
+    
+    .nav-link.active::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: hsl(var(--primary));
+        border-radius: 0 1px 1px 0;
+    }
+    
+    .section-button-active {
+        background: hsl(var(--accent)) !important;
+        color: hsl(var(--accent-foreground)) !important;
     }
 </style>
 @endpush
@@ -974,6 +1103,1199 @@
         </div>
     </div>
 
+    <!-- Delete Account Section -->
+    <div class="space-y-4 mb-8">
+        <h2 id="delete-account" class="scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight mb-6">
+            🗑️ Delete Account
+        </h2>
+        <p class="text-muted-foreground mb-4">
+            Permanently delete your user account and all associated data. This action cannot be undone.
+        </p>
+
+        <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
+            <div class="flex flex-col space-y-1.5 p-6">
+                <div class="flex items-center gap-2">
+                    <span class="method-badge method-delete">DELETE</span>
+                    <code class="text-sm font-mono bg-muted px-2 py-1 rounded">/api/account</code>
+                </div>
+                <p class="text-sm text-muted-foreground">Delete the authenticated user's account</p>
+            </div>
+            <div class="p-6 pt-0">
+                <div class="grid w-full items-center gap-4">
+                    <div class="flex flex-col space-y-1.5">
+                        <label class="text-sm font-medium leading-none" for="delete-password">Current Password *</label>
+                        <input 
+                            type="password" 
+                            id="delete-password" 
+                            placeholder="Enter your current password"
+                            class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                            required
+                        >
+                    </div>
+                    <button 
+                        onclick="testEndpoint('delete-account')" 
+                        class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-destructive text-destructive-foreground hover:bg-destructive/90 h-10 px-4 py-2"
+                    >
+                        🗑️ Delete Account
+                    </button>
+                </div>
+                
+                <div class="mt-4">
+                    <h4 class="text-sm font-semibold mb-2">Response</h4>
+                    <pre id="delete-account-response" class="response-container text-sm bg-muted p-3 rounded overflow-x-auto">Click "Delete Account" to see the response</pre>
+                </div>
+
+                <div class="mt-4 p-4 bg-destructive/10 border border-destructive/20 rounded">
+                    <p class="text-sm text-destructive font-medium">⚠️ Warning</p>
+                    <p class="text-sm text-muted-foreground mt-1">
+                        This action will permanently delete your account and all associated data including accounts, transactions, categories, and budgets. This cannot be undone.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Account Management Testing -->
+    <div class="mb-12">
+        <h2 id="account-management" class="scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight mb-6">
+            💳 Account Management
+        </h2>
+
+        <!-- List Accounts -->
+        <div class="mb-8">
+            <h3 class="text-2xl font-semibold mb-4">List All Accounts</h3>
+            
+            <div class="rounded-lg border border-border bg-card text-card-foreground shadow-sm endpoint-card">
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-3">
+                            <span class="method-badge method-get">GET</span>
+                            <code class="text-lg font-mono">/api/accounts</code>
+                        </div>
+                        <span class="text-sm text-muted-foreground">Authentication: Bearer Token</span>
+                    </div>
+                    
+                    <p class="text-muted-foreground mb-6">Retrieve all user accounts with transaction counts</p>
+                    
+                    <div class="grid lg:grid-cols-2 gap-6">
+                        <!-- Test Form -->
+                        <div>
+                            <h4 class="text-lg font-semibold mb-3">Test this endpoint</h4>
+                            <div class="rounded-lg border border-border bg-muted/30 p-4">
+                                <form onsubmit="testEndpoint(event, 'accounts-list')" class="space-y-3">
+                                    <button type="submit" 
+                                            class="w-full inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
+                                        Send GET Request
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        
+                        <!-- Example Response -->
+                        <div>
+                            <h4 class="text-lg font-semibold mb-3">Example Response</h4>
+                            <pre class="text-xs"><code>{
+  "success": true,
+  "accounts": [
+    {
+      "id": 1,
+      "name": "Main Checking",
+      "type": "bank",
+      "balance": "2500.00",
+      "description": "Primary checking account",
+      "transactions_count": 45,
+      "created_at": "2024-01-15T10:30:00.000000Z"
+    }
+  ]
+}</code></pre>
+                        </div>
+                    </div>
+                    
+                    <!-- Response Container -->
+                    <div id="response-accounts-list" class="mt-6 hidden">
+                        <h4 class="text-lg font-semibold mb-3">Response</h4>
+                        <div class="response-container rounded border bg-muted p-4">
+                            <pre id="response-content-accounts-list" class="text-sm"></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Create Account -->
+        <div class="mb-8">
+            <h3 class="text-2xl font-semibold mb-4">Create New Account</h3>
+            
+            <div class="rounded-lg border border-border bg-card text-card-foreground shadow-sm endpoint-card">
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-3">
+                            <span class="method-badge method-post">POST</span>
+                            <code class="text-lg font-mono">/api/accounts</code>
+                        </div>
+                        <span class="text-sm text-muted-foreground">Authentication: Bearer Token</span>
+                    </div>
+                    
+                    <p class="text-muted-foreground mb-6">Create a new financial account</p>
+                    
+                    <div class="grid lg:grid-cols-2 gap-6">
+                        <!-- Parameters & Test Form -->
+                        <div>
+                            <h4 class="text-lg font-semibold mb-3">Request Parameters</h4>
+                            <div class="space-y-2 mb-4">
+                                <div class="flex justify-between items-center py-2 px-3 bg-muted/50 rounded">
+                                    <code class="text-sm">name</code>
+                                    <span class="text-xs text-muted-foreground">string, required</span>
+                                </div>
+                                <div class="flex justify-between items-center py-2 px-3 bg-muted/50 rounded">
+                                    <code class="text-sm">type</code>
+                                    <span class="text-xs text-muted-foreground">enum (cash, bank, credit_card)</span>
+                                </div>
+                                <div class="flex justify-between items-center py-2 px-3 bg-muted/50 rounded">
+                                    <code class="text-sm">balance</code>
+                                    <span class="text-xs text-muted-foreground">decimal, required</span>
+                                </div>
+                                <div class="flex justify-between items-center py-2 px-3 bg-muted/50 rounded">
+                                    <code class="text-sm">description</code>
+                                    <span class="text-xs text-muted-foreground">string, optional</span>
+                                </div>
+                            </div>
+                            
+                            <div class="rounded-lg border border-border bg-muted/30 p-4">
+                                <h5 class="font-medium mb-3">Test this endpoint</h5>
+                                <form onsubmit="testEndpoint(event, 'accounts-create')" class="space-y-3">
+                                    <input name="name" placeholder="Account Name (e.g., Main Checking)" 
+                                           class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" 
+                                           required>
+                                    <select name="type" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" required>
+                                        <option value="">Select Account Type</option>
+                                        <option value="cash">Cash</option>
+                                        <option value="bank">Bank Account</option>
+                                        <option value="credit_card">Credit Card</option>
+                                    </select>
+                                    <input name="balance" type="number" step="0.01" placeholder="Initial Balance (e.g., 1500.00)" 
+                                           class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" 
+                                           required>
+                                    <input name="description" placeholder="Optional description" 
+                                           class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+                                    <button type="submit" 
+                                            class="w-full inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
+                                        Send Request
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        
+                        <!-- Example Response -->
+                        <div>
+                            <h4 class="text-lg font-semibold mb-3">Example Response</h4>
+                            <pre class="text-xs"><code>{
+  "success": true,
+  "message": "Account created successfully.",
+  "account": {
+    "id": 2,
+    "name": "Savings Account",
+    "type": "bank",
+    "balance": "5000.00",
+    "description": "Emergency fund account",
+    "user_id": 1,
+    "created_at": "2024-01-15T14:22:00.000000Z",
+    "updated_at": "2024-01-15T14:22:00.000000Z"
+  }
+}</code></pre>
+                        </div>
+                    </div>
+                    
+                    <!-- Response Container -->
+                    <div id="response-accounts-create" class="mt-6 hidden">
+                        <h4 class="text-lg font-semibold mb-3">Response</h4>
+                        <div class="response-container rounded border bg-muted p-4">
+                            <pre id="response-content-accounts-create" class="text-sm"></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Get Single Account -->
+        <div class="mb-8">
+            <h3 class="text-2xl font-semibold mb-4">Get Account with Transaction History</h3>
+            
+            <div class="rounded-lg border border-border bg-card text-card-foreground shadow-sm endpoint-card">
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-3">
+                            <span class="method-badge method-get">GET</span>
+                            <code class="text-lg font-mono">/api/accounts/{id}</code>
+                        </div>
+                        <span class="text-sm text-muted-foreground">Authentication: Bearer Token</span>
+                    </div>
+                    
+                    <p class="text-muted-foreground mb-6">Get account details with paginated transaction history</p>
+                    
+                    <div class="grid lg:grid-cols-2 gap-6">
+                        <!-- Test Form -->
+                        <div>
+                            <h4 class="text-lg font-semibold mb-3">Test this endpoint</h4>
+                            <div class="rounded-lg border border-border bg-muted/30 p-4">
+                                <form onsubmit="testEndpoint(event, 'accounts-show')" class="space-y-3">
+                                    <input name="account_id" type="number" placeholder="Account ID (e.g., 1)" 
+                                           class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" 
+                                           required>
+                                    <button type="submit" 
+                                            class="w-full inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
+                                        Send GET Request
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        
+                        <!-- Example Response -->
+                        <div>
+                            <h4 class="text-lg font-semibold mb-3">Example Response</h4>
+                            <pre class="text-xs"><code>{
+  "success": true,
+  "account": {
+    "id": 1,
+    "name": "Main Checking",
+    "type": "bank",
+    "balance": "2500.00",
+    "description": "Primary checking account",
+    "transactions": {
+      "data": [
+        {
+          "id": 15,
+          "type": "expense",
+          "amount": "75.50",
+          "description": "Grocery shopping",
+          "date": "2024-01-15",
+          "category": {
+            "id": 3,
+            "name": "Food & Dining"
+          }
+        }
+      ],
+      "current_page": 1,
+      "total": 45
+    }
+  }
+}</code></pre>
+                        </div>
+                    </div>
+                    
+                    <!-- Response Container -->
+                    <div id="response-accounts-show" class="mt-6 hidden">
+                        <h4 class="text-lg font-semibold mb-3">Response</h4>
+                        <div class="response-container rounded border bg-muted p-4">
+                            <pre id="response-content-accounts-show" class="text-sm"></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Update Account -->
+        <div class="mb-8">
+            <h3 class="text-2xl font-semibold mb-4">Update Account Details</h3>
+            
+            <div class="rounded-lg border border-border bg-card text-card-foreground shadow-sm endpoint-card">
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-3">
+                            <span class="method-badge method-put">PUT</span>
+                            <code class="text-lg font-mono">/api/accounts/{id}</code>
+                        </div>
+                        <span class="text-sm text-muted-foreground">Authentication: Bearer Token</span>
+                    </div>
+                    
+                    <p class="text-muted-foreground mb-6">Update account information and balance</p>
+                    
+                    <div class="grid lg:grid-cols-2 gap-6">
+                        <!-- Parameters & Test Form -->
+                        <div>
+                            <h4 class="text-lg font-semibold mb-3">Request Parameters</h4>
+                            <div class="space-y-2 mb-4">
+                                <div class="flex justify-between items-center py-2 px-3 bg-muted/50 rounded">
+                                    <code class="text-sm">name</code>
+                                    <span class="text-xs text-muted-foreground">string, required</span>
+                                </div>
+                                <div class="flex justify-between items-center py-2 px-3 bg-muted/50 rounded">
+                                    <code class="text-sm">type</code>
+                                    <span class="text-xs text-muted-foreground">enum (cash, bank, credit_card)</span>
+                                </div>
+                                <div class="flex justify-between items-center py-2 px-3 bg-muted/50 rounded">
+                                    <code class="text-sm">balance</code>
+                                    <span class="text-xs text-muted-foreground">decimal, required</span>
+                                </div>
+                                <div class="flex justify-between items-center py-2 px-3 bg-muted/50 rounded">
+                                    <code class="text-sm">description</code>
+                                    <span class="text-xs text-muted-foreground">string, optional</span>
+                                </div>
+                            </div>
+                            
+                            <div class="rounded-lg border border-border bg-muted/30 p-4">
+                                <h5 class="font-medium mb-3">Test this endpoint</h5>
+                                <form onsubmit="testEndpoint(event, 'accounts-update')" class="space-y-3">
+                                    <input name="account_id" type="number" placeholder="Account ID to update" 
+                                           class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" 
+                                           required>
+                                    <input name="name" placeholder="Updated Account Name" 
+                                           class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" 
+                                           required>
+                                    <select name="type" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" required>
+                                        <option value="">Select Account Type</option>
+                                        <option value="cash">Cash</option>
+                                        <option value="bank">Bank Account</option>
+                                        <option value="credit_card">Credit Card</option>
+                                    </select>
+                                    <input name="balance" type="number" step="0.01" placeholder="Updated Balance" 
+                                           class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" 
+                                           required>
+                                    <input name="description" placeholder="Updated description" 
+                                           class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+                                    <button type="submit" 
+                                            class="w-full inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
+                                        Send Request
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        
+                        <!-- Example Response -->
+                        <div>
+                            <h4 class="text-lg font-semibold mb-3">Example Response</h4>
+                            <pre class="text-xs"><code>{
+  "success": true,
+  "message": "Account updated successfully.",
+  "account": {
+    "id": 1,
+    "name": "Updated Checking Account",
+    "type": "bank",
+    "balance": "3000.00",
+    "description": "Updated primary account",
+    "user_id": 1,
+    "created_at": "2024-01-15T10:30:00.000000Z",
+    "updated_at": "2024-01-15T15:45:00.000000Z"
+  }
+}</code></pre>
+                        </div>
+                    </div>
+                    
+                    <!-- Response Container -->
+                    <div id="response-accounts-update" class="mt-6 hidden">
+                        <h4 class="text-lg font-semibold mb-3">Response</h4>
+                        <div class="response-container rounded border bg-muted p-4">
+                            <pre id="response-content-accounts-update" class="text-sm"></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Delete Account -->
+        <div class="mb-8">
+            <h3 class="text-2xl font-semibold mb-4">Delete Account and Transactions</h3>
+            
+            <div class="rounded-lg border border-border bg-card text-card-foreground shadow-sm endpoint-card">
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-3">
+                            <span class="method-badge method-delete">DELETE</span>
+                            <code class="text-lg font-mono">/api/accounts/{id}</code>
+                        </div>
+                        <span class="text-sm text-muted-foreground">Authentication: Bearer Token</span>
+                    </div>
+                    
+                    <p class="text-muted-foreground mb-6">Delete an account and all associated transactions</p>
+                    
+                    <div class="grid lg:grid-cols-2 gap-6">
+                        <!-- Test Form -->
+                        <div>
+                            <h4 class="text-lg font-semibold mb-3">Test this endpoint</h4>
+                            <div class="rounded-lg border border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950/30 p-4">
+                                <div class="flex items-start space-x-3 mb-3">
+                                    <div class="flex-shrink-0">
+                                        <svg class="h-5 w-5 text-red-600 dark:text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-medium text-red-900 dark:text-red-100">Warning</p>
+                                        <p class="text-sm text-red-700 dark:text-red-300">This action cannot be undone. All transactions will be permanently deleted.</p>
+                                    </div>
+                                </div>
+                                <form onsubmit="testEndpoint(event, 'accounts-delete')" class="space-y-3">
+                                    <input name="account_id" type="number" placeholder="Account ID to delete" 
+                                           class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" 
+                                           required>
+                                    <button type="submit" 
+                                            class="w-full inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-destructive text-destructive-foreground hover:bg-destructive/90 h-10 px-4 py-2">
+                                        Delete Account
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        
+                        <!-- Example Response -->
+                        <div>
+                            <h4 class="text-lg font-semibold mb-3">Example Response</h4>
+                            <pre class="text-xs"><code>{
+  "success": true,
+  "message": "Account and all associated transactions deleted successfully."
+}</code></pre>
+                        </div>
+                    </div>
+                    
+                    <!-- Response Container -->
+                    <div id="response-accounts-delete" class="mt-6 hidden">
+                        <h4 class="text-lg font-semibold mb-3">Response</h4>
+                        <div class="response-container rounded border bg-muted p-4">
+                            <pre id="response-content-accounts-delete" class="text-sm"></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Category Management Testing -->
+    <div class="mb-12">
+        <h2 id="category-management" class="scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight mb-6">
+            🏷️ Category Management
+        </h2>
+
+        <!-- List Categories -->
+        <div class="mb-8">
+            <h3 class="text-2xl font-semibold mb-4">List All Categories</h3>
+            
+            <div class="rounded-lg border border-border bg-card text-card-foreground shadow-sm endpoint-card">
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-3">
+                            <span class="method-badge method-get">GET</span>
+                            <code class="text-lg font-mono">/api/categories</code>
+                        </div>
+                        <span class="text-sm text-muted-foreground">Authentication: Bearer Token</span>
+                    </div>
+                    
+                    <p class="text-muted-foreground mb-6">Retrieve all user categories with transaction and budget statistics</p>
+                    
+                    <div class="grid lg:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="text-lg font-semibold mb-3">Test this endpoint</h4>
+                            <div class="rounded-lg border border-border bg-muted/30 p-4">
+                                <form onsubmit="testEndpoint(event, 'categories-list')" class="space-y-3">
+                                    <button type="submit" class="w-full inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
+                                        Send GET Request
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h4 class="text-lg font-semibold mb-3">Example Response</h4>
+                            <pre class="text-xs"><code>{
+  "success": true,
+  "categories": [
+    {
+      "id": 1,
+      "name": "Food & Dining",
+      "type": "expense",
+      "color": "#ef4444",
+      "description": "Meals and restaurants",
+      "transactions_count": 25,
+      "budgets_count": 2,
+      "created_at": "2024-01-15T10:30:00.000000Z"
+    }
+  ]
+}</code></pre>
+                        </div>
+                    </div>
+                    
+                    <div id="response-categories-list" class="mt-6 hidden">
+                        <h4 class="text-lg font-semibold mb-3">Response</h4>
+                        <div class="response-container rounded border bg-muted p-4">
+                            <pre id="response-content-categories-list" class="text-sm"></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Create Category -->
+        <div class="mb-8">
+            <h3 class="text-2xl font-semibold mb-4">Create New Category</h3>
+            
+            <div class="rounded-lg border border-border bg-card text-card-foreground shadow-sm endpoint-card">
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-3">
+                            <span class="method-badge method-post">POST</span>
+                            <code class="text-lg font-mono">/api/categories</code>
+                        </div>
+                        <span class="text-sm text-muted-foreground">Authentication: Bearer Token</span>
+                    </div>
+                    
+                    <p class="text-muted-foreground mb-6">Create a new transaction category with color and type</p>
+                    
+                    <div class="grid lg:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="text-lg font-semibold mb-3">Request Parameters</h4>
+                            <div class="space-y-2 mb-4">
+                                <div class="flex justify-between items-center py-2 px-3 bg-muted/50 rounded">
+                                    <code class="text-sm">name</code>
+                                    <span class="text-xs text-muted-foreground">string, required</span>
+                                </div>
+                                <div class="flex justify-between items-center py-2 px-3 bg-muted/50 rounded">
+                                    <code class="text-sm">type</code>
+                                    <span class="text-xs text-muted-foreground">enum (income, expense)</span>
+                                </div>
+                                <div class="flex justify-between items-center py-2 px-3 bg-muted/50 rounded">
+                                    <code class="text-sm">color</code>
+                                    <span class="text-xs text-muted-foreground">hex color, required</span>
+                                </div>
+                                <div class="flex justify-between items-center py-2 px-3 bg-muted/50 rounded">
+                                    <code class="text-sm">description</code>
+                                    <span class="text-xs text-muted-foreground">string, optional</span>
+                                </div>
+                            </div>
+                            
+                            <div class="rounded-lg border border-border bg-muted/30 p-4">
+                                <h5 class="font-medium mb-3">Test this endpoint</h5>
+                                <form onsubmit="testEndpoint(event, 'categories-create')" class="space-y-3">
+                                    <input name="name" placeholder="Category Name (e.g., Groceries)" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" required>
+                                    <select name="type" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" required>
+                                        <option value="">Select Category Type</option>
+                                        <option value="income">Income</option>
+                                        <option value="expense">Expense</option>
+                                    </select>
+                                    <input name="color" type="color" value="#ef4444" class="w-full h-10 border border-input rounded-md cursor-pointer">
+                                    <input name="description" placeholder="Optional description" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+                                    <button type="submit" class="w-full inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
+                                        Send Request
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h4 class="text-lg font-semibold mb-3">Example Response</h4>
+                            <pre class="text-xs"><code>{
+  "success": true,
+  "message": "Category created successfully.",
+  "category": {
+    "id": 5,
+    "name": "Entertainment",
+    "type": "expense",
+    "color": "#8b5cf6",
+    "description": "Movies, games, fun activities",
+    "user_id": 1,
+    "created_at": "2024-01-15T14:22:00.000000Z"
+  }
+}</code></pre>
+                        </div>
+                    </div>
+                    
+                    <div id="response-categories-create" class="mt-6 hidden">
+                        <h4 class="text-lg font-semibold mb-3">Response</h4>
+                        <div class="response-container rounded border bg-muted p-4">
+                            <pre id="response-content-categories-create" class="text-sm"></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Get Single Category -->
+        <div class="mb-8">
+            <h3 class="text-2xl font-semibold mb-4">Get Category with Analytics</h3>
+            
+            <div class="rounded-lg border border-border bg-card text-card-foreground shadow-sm endpoint-card">
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-3">
+                            <span class="method-badge method-get">GET</span>
+                            <code class="text-lg font-mono">/api/categories/{id}</code>
+                        </div>
+                        <span class="text-sm text-muted-foreground">Authentication: Bearer Token</span>
+                    </div>
+                    
+                    <p class="text-muted-foreground mb-6">Get category details with recent transactions and spending analytics</p>
+                    
+                    <div class="grid lg:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="text-lg font-semibold mb-3">Test this endpoint</h4>
+                            <div class="rounded-lg border border-border bg-muted/30 p-4">
+                                <form onsubmit="testEndpoint(event, 'categories-show')" class="space-y-3">
+                                    <input name="category_id" type="number" placeholder="Category ID (e.g., 1)" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" required>
+                                    <button type="submit" class="w-full inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
+                                        Send GET Request
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h4 class="text-lg font-semibold mb-3">Example Response</h4>
+                            <pre class="text-xs"><code>{
+  "success": true,
+  "category": {
+    "id": 1,
+    "name": "Food & Dining",
+    "type": "expense",
+    "color": "#ef4444",
+    "transactions_count": 25
+  },
+  "recent_transactions": [
+    {
+      "id": 15,
+      "amount": "45.50",
+      "description": "Lunch at cafe",
+      "date": "2024-01-15",
+      "account": {
+        "name": "Main Checking"
+      }
+    }
+  ],
+  "total_amount": 1250.75,
+  "active_budgets": 1
+}</code></pre>
+                        </div>
+                    </div>
+                    
+                    <div id="response-categories-show" class="mt-6 hidden">
+                        <h4 class="text-lg font-semibold mb-3">Response</h4>
+                        <div class="response-container rounded border bg-muted p-4">
+                            <pre id="response-content-categories-show" class="text-sm"></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Transaction Management Testing -->
+    <div class="mb-12">
+        <h2 id="transaction-management" class="scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight mb-6">
+            💸 Transaction Management
+        </h2>
+
+        <!-- List Transactions -->
+        <div class="mb-8">
+            <h3 class="text-2xl font-semibold mb-4">List All Transactions</h3>
+            
+            <div class="rounded-lg border border-border bg-card text-card-foreground shadow-sm endpoint-card">
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-3">
+                            <span class="method-badge method-get">GET</span>
+                            <code class="text-lg font-mono">/api/transactions</code>
+                        </div>
+                        <span class="text-sm text-muted-foreground">Authentication: Bearer Token</span>
+                    </div>
+                    
+                    <p class="text-muted-foreground mb-6">Retrieve paginated transactions with account and category relationships</p>
+                    
+                    <div class="grid lg:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="text-lg font-semibold mb-3">Test this endpoint</h4>
+                            <div class="rounded-lg border border-border bg-muted/30 p-4">
+                                <form onsubmit="testEndpoint(event, 'transactions-list')" class="space-y-3">
+                                    <button type="submit" class="w-full inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
+                                        Send GET Request
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h4 class="text-lg font-semibold mb-3">Example Response</h4>
+                            <pre class="text-xs"><code>{
+  "success": true,
+  "transactions": {
+    "data": [
+      {
+        "id": 1,
+        "type": "expense",
+        "amount": "75.50",
+        "description": "Grocery shopping",
+        "date": "2024-01-15",
+        "account": {
+          "id": 1,
+          "name": "Main Checking"
+        },
+        "category": {
+          "id": 3,
+          "name": "Food & Dining",
+          "color": "#ef4444"
+        }
+      }
+    ],
+    "current_page": 1,
+    "total": 156
+  }
+}</code></pre>
+                        </div>
+                    </div>
+                    
+                    <div id="response-transactions-list" class="mt-6 hidden">
+                        <h4 class="text-lg font-semibold mb-3">Response</h4>
+                        <div class="response-container rounded border bg-muted p-4">
+                            <pre id="response-content-transactions-list" class="text-sm"></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Create Transaction -->
+        <div class="mb-8">
+            <h3 class="text-2xl font-semibold mb-4">Create New Transaction</h3>
+            
+            <div class="rounded-lg border border-border bg-card text-card-foreground shadow-sm endpoint-card">
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-3">
+                            <span class="method-badge method-post">POST</span>
+                            <code class="text-lg font-mono">/api/transactions</code>
+                        </div>
+                        <span class="text-sm text-muted-foreground">Authentication: Bearer Token</span>
+                    </div>
+                    
+                    <p class="text-muted-foreground mb-6">Create a new transaction with account and category validation</p>
+                    
+                    <div class="grid lg:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="text-lg font-semibold mb-3">Request Parameters</h4>
+                            <div class="space-y-2 mb-4">
+                                <div class="flex justify-between items-center py-2 px-3 bg-muted/50 rounded">
+                                    <code class="text-sm">type</code>
+                                    <span class="text-xs text-muted-foreground">enum (income, expense)</span>
+                                </div>
+                                <div class="flex justify-between items-center py-2 px-3 bg-muted/50 rounded">
+                                    <code class="text-sm">amount</code>
+                                    <span class="text-xs text-muted-foreground">decimal, required</span>
+                                </div>
+                                <div class="flex justify-between items-center py-2 px-3 bg-muted/50 rounded">
+                                    <code class="text-sm">account_id</code>
+                                    <span class="text-xs text-muted-foreground">integer, required</span>
+                                </div>
+                                <div class="flex justify-between items-center py-2 px-3 bg-muted/50 rounded">
+                                    <code class="text-sm">category_id</code>
+                                    <span class="text-xs text-muted-foreground">integer, required</span>
+                                </div>
+                                <div class="flex justify-between items-center py-2 px-3 bg-muted/50 rounded">
+                                    <code class="text-sm">date</code>
+                                    <span class="text-xs text-muted-foreground">date, required</span>
+                                </div>
+                                <div class="flex justify-between items-center py-2 px-3 bg-muted/50 rounded">
+                                    <code class="text-sm">description</code>
+                                    <span class="text-xs text-muted-foreground">string, required</span>
+                                </div>
+                            </div>
+                            
+                            <div class="rounded-lg border border-border bg-muted/30 p-4">
+                                <h5 class="font-medium mb-3">Test this endpoint</h5>
+                                <form onsubmit="testEndpoint(event, 'transactions-create')" class="space-y-3">
+                                    <select name="type" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" required>
+                                        <option value="">Select Transaction Type</option>
+                                        <option value="income">Income</option>
+                                        <option value="expense">Expense</option>
+                                    </select>
+                                    <input name="amount" type="number" step="0.01" placeholder="Amount (e.g., 50.00)" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" required>
+                                    <input name="account_id" type="number" placeholder="Account ID" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" required>
+                                    <input name="category_id" type="number" placeholder="Category ID" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" required>
+                                    <input name="date" type="date" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" required>
+                                    <input name="description" placeholder="Transaction description" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" required>
+                                    <button type="submit" class="w-full inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
+                                        Send Request
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h4 class="text-lg font-semibold mb-3">Example Response</h4>
+                            <pre class="text-xs"><code>{
+  "success": true,
+  "message": "Transaction created successfully.",
+  "transaction": {
+    "id": 25,
+    "type": "expense",
+    "amount": "45.99",
+    "description": "Coffee and pastry",
+    "date": "2024-01-15",
+    "account_id": 1,
+    "category_id": 3,
+    "user_id": 1,
+    "created_at": "2024-01-15T14:22:00.000000Z"
+  }
+}</code></pre>
+                        </div>
+                    </div>
+                    
+                    <div id="response-transactions-create" class="mt-6 hidden">
+                        <h4 class="text-lg font-semibold mb-3">Response</h4>
+                        <div class="response-container rounded border bg-muted p-4">
+                            <pre id="response-content-transactions-create" class="text-sm"></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Budget Management Testing -->
+    <div class="mb-12">
+        <h2 id="budget-management" class="scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight mb-6">
+            📊 Budget Management
+        </h2>
+
+        <!-- List Budgets -->
+        <div class="mb-8">
+            <h3 class="text-2xl font-semibold mb-4">List All Budgets</h3>
+            
+            <div class="rounded-lg border border-border bg-card text-card-foreground shadow-sm endpoint-card">
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-3">
+                            <span class="method-badge method-get">GET</span>
+                            <code class="text-lg font-mono">/api/budgets</code>
+                        </div>
+                        <span class="text-sm text-muted-foreground">Authentication: Bearer Token</span>
+                    </div>
+                    
+                    <p class="text-muted-foreground mb-6">Retrieve all budgets with progress tracking and category details</p>
+                    
+                    <div class="grid lg:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="text-lg font-semibold mb-3">Test this endpoint</h4>
+                            <div class="rounded-lg border border-border bg-muted/30 p-4">
+                                <form onsubmit="testEndpoint(event, 'budgets-list')" class="space-y-3">
+                                    <button type="submit" class="w-full inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
+                                        Send GET Request
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h4 class="text-lg font-semibold mb-3">Example Response</h4>
+                            <pre class="text-xs"><code>{
+  "success": true,
+  "budgets": {
+    "data": [
+      {
+        "id": 1,
+        "name": "Monthly Food Budget",
+        "amount": "600.00",
+        "start_date": "2024-01-01",
+        "end_date": "2024-01-31",
+        "description": "Monthly food expenses",
+        "category": {
+          "id": 3,
+          "name": "Food & Dining",
+          "color": "#ef4444"
+        },
+        "spent_amount": "425.75",
+        "remaining_amount": "174.25",
+        "percentage_used": 70.96
+      }
+    ],
+    "current_page": 1,
+    "total": 8
+  }
+}</code></pre>
+                        </div>
+                    </div>
+                    
+                    <div id="response-budgets-list" class="mt-6 hidden">
+                        <h4 class="text-lg font-semibold mb-3">Response</h4>
+                        <div class="response-container rounded border bg-muted p-4">
+                            <pre id="response-content-budgets-list" class="text-sm"></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Create Budget -->
+        <div id="budget-create" class="mb-8">
+            <h3 class="text-2xl font-semibold mb-4">Create New Budget</h3>
+            
+            <div class="rounded-lg border border-border bg-card text-card-foreground shadow-sm endpoint-card">
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-3">
+                            <span class="method-badge method-post">POST</span>
+                            <code class="text-lg font-mono">/api/budgets</code>
+                        </div>
+                        <span class="text-sm text-muted-foreground">Authentication: Bearer Token</span>
+                    </div>
+                    
+                    <p class="text-muted-foreground mb-6">Create a new budget with overlap validation and spending limits</p>
+                    
+                    <div class="grid lg:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="text-lg font-semibold mb-3">Request Parameters</h4>
+                            <div class="space-y-2 mb-4">
+                                <div class="flex justify-between items-center py-2 px-3 bg-muted/50 rounded">
+                                    <code class="text-sm">name</code>
+                                    <span class="text-xs text-muted-foreground">string, required</span>
+                                </div>
+                                <div class="flex justify-between items-center py-2 px-3 bg-muted/50 rounded">
+                                    <code class="text-sm">amount</code>
+                                    <span class="text-xs text-muted-foreground">decimal, required</span>
+                                </div>
+                                <div class="flex justify-between items-center py-2 px-3 bg-muted/50 rounded">
+                                    <code class="text-sm">category_id</code>
+                                    <span class="text-xs text-muted-foreground">integer, required</span>
+                                </div>
+                                <div class="flex justify-between items-center py-2 px-3 bg-muted/50 rounded">
+                                    <code class="text-sm">start_date</code>
+                                    <span class="text-xs text-muted-foreground">date, required</span>
+                                </div>
+                                <div class="flex justify-between items-center py-2 px-3 bg-muted/50 rounded">
+                                    <code class="text-sm">end_date</code>
+                                    <span class="text-xs text-muted-foreground">date, required</span>
+                                </div>
+                                <div class="flex justify-between items-center py-2 px-3 bg-muted/50 rounded">
+                                    <code class="text-sm">description</code>
+                                    <span class="text-xs text-muted-foreground">string, optional</span>
+                                </div>
+                                <div class="flex justify-between items-center py-2 px-3 bg-muted/50 rounded">
+                                    <code class="text-sm">is_limiter</code>
+                                    <span class="text-xs text-muted-foreground">boolean, optional</span>
+                                </div>
+                            </div>
+                            
+                            <div class="rounded-lg border border-border bg-muted/30 p-4">
+                                <h5 class="font-medium mb-3">Test this endpoint</h5>
+                                <form onsubmit="testEndpoint(event, 'budgets-create')" class="space-y-3">
+                                    <input name="name" placeholder="Budget Name (e.g., Monthly Entertainment)" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" required>
+                                    <input name="amount" type="number" step="0.01" placeholder="Budget Amount (e.g., 300.00)" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" required>
+                                    <input name="category_id" type="number" placeholder="Category ID (expense categories only)" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" required>
+                                    <input name="start_date" type="date" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" required>
+                                    <input name="end_date" type="date" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" required>
+                                    <input name="description" placeholder="Budget description (optional)" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+                                    <div class="flex items-center space-x-2">
+                                        <input name="is_limiter" type="checkbox" id="is_limiter_create" class="rounded border-input">
+                                        <label for="is_limiter_create" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Hard limit (prevent overspending)</label>
+                                    </div>
+                                    <button type="submit" class="w-full inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
+                                        Send Request
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h4 class="text-lg font-semibold mb-3">Example Response</h4>
+                            <pre class="text-xs"><code>{
+  "success": true,
+  "message": "Budget created successfully.",
+  "budget": {
+    "id": 3,
+    "name": "Q1 Transportation",
+    "amount": "400.00",
+    "start_date": "2024-01-01",
+    "end_date": "2024-03-31",
+    "description": "Quarterly transport budget",
+    "is_limiter": false,
+    "category_id": 8,
+    "user_id": 1,
+    "created_at": "2024-01-15T14:22:00.000000Z"
+  }
+}</code></pre>
+                        </div>
+                    </div>
+                    
+                    <div id="response-budgets-create" class="mt-6 hidden">
+                        <h4 class="text-lg font-semibold mb-3">Response</h4>
+                        <div class="response-container rounded border bg-muted p-4">
+                            <pre id="response-content-budgets-create" class="text-sm"></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Update Budget -->
+        <div id="budget-update" class="mb-8">
+            <h3 class="text-2xl font-semibold mb-4">Update Budget</h3>
+            
+            <div class="rounded-lg border border-border bg-card text-card-foreground shadow-sm endpoint-card">
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-3">
+                            <span class="method-badge method-put">PUT</span>
+                            <code class="text-lg font-mono">/api/budgets/{id}</code>
+                        </div>
+                        <span class="text-sm text-muted-foreground">Authentication: Bearer Token</span>
+                    </div>
+                    
+                    <p class="text-muted-foreground mb-6">Update an existing budget with overlap validation and parameter changes</p>
+                    
+                    <div class="grid lg:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="text-lg font-semibold mb-3">Request Parameters</h4>
+                            <div class="space-y-2 mb-4">
+                                <div class="flex justify-between items-center py-2 px-3 bg-muted/50 rounded">
+                                    <code class="text-sm">name</code>
+                                    <span class="text-xs text-muted-foreground">string, required</span>
+                                </div>
+                                <div class="flex justify-between items-center py-2 px-3 bg-muted/50 rounded">
+                                    <code class="text-sm">amount</code>
+                                    <span class="text-xs text-muted-foreground">decimal, required</span>
+                                </div>
+                                <div class="flex justify-between items-center py-2 px-3 bg-muted/50 rounded">
+                                    <code class="text-sm">category_id</code>
+                                    <span class="text-xs text-muted-foreground">integer, required</span>
+                                </div>
+                                <div class="flex justify-between items-center py-2 px-3 bg-muted/50 rounded">
+                                    <code class="text-sm">start_date</code>
+                                    <span class="text-xs text-muted-foreground">date, required</span>
+                                </div>
+                                <div class="flex justify-between items-center py-2 px-3 bg-muted/50 rounded">
+                                    <code class="text-sm">end_date</code>
+                                    <span class="text-xs text-muted-foreground">date, required</span>
+                                </div>
+                                <div class="flex justify-between items-center py-2 px-3 bg-muted/50 rounded">
+                                    <code class="text-sm">description</code>
+                                    <span class="text-xs text-muted-foreground">string, optional</span>
+                                </div>
+                                <div class="flex justify-between items-center py-2 px-3 bg-muted/50 rounded">
+                                    <code class="text-sm">is_limiter</code>
+                                    <span class="text-xs text-muted-foreground">boolean, optional</span>
+                                </div>
+                            </div>
+                            
+                            <div class="rounded-lg border border-border bg-muted/30 p-4">
+                                <h5 class="font-medium mb-3">Test this endpoint</h5>
+                                <form onsubmit="testEndpoint(event, 'budgets-update')" class="space-y-3">
+                                    <input name="budget_id" type="number" placeholder="Budget ID to update" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" required>
+                                    <input name="name" placeholder="Budget Name (e.g., Updated Entertainment Budget)" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" required>
+                                    <input name="amount" type="number" step="0.01" placeholder="Budget Amount (e.g., 450.00)" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" required>
+                                    <input name="category_id" type="number" placeholder="Category ID (expense categories only)" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" required>
+                                    <input name="start_date" type="date" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" required>
+                                    <input name="end_date" type="date" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" required>
+                                    <input name="description" placeholder="Budget description (optional)" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+                                    <div class="flex items-center space-x-2">
+                                        <input name="is_limiter" type="checkbox" id="is_limiter" class="rounded border-input">
+                                        <label for="is_limiter" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Hard limit (prevent overspending)</label>
+                                    </div>
+                                    <button type="submit" class="w-full inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
+                                        Send PUT Request
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h4 class="text-lg font-semibold mb-3">Example Response</h4>
+                            <pre class="text-xs"><code>{
+  "success": true,
+  "message": "Budget updated successfully.",
+  "budget": {
+    "id": 3,
+    "name": "Updated Entertainment Budget",
+    "amount": "450.00",
+    "start_date": "2024-01-01",
+    "end_date": "2024-01-31",
+    "description": "Updated monthly entertainment budget",
+    "is_limiter": false,
+    "category_id": 5,
+    "user_id": 1,
+    "created_at": "2024-01-15T14:22:00.000000Z",
+    "updated_at": "2024-01-20T16:45:00.000000Z"
+  }
+}</code></pre>
+                        </div>
+                    </div>
+                    
+                    <div id="response-budgets-update" class="mt-6 hidden">
+                        <h4 class="text-lg font-semibold mb-3">Response</h4>
+                        <div class="response-container rounded border bg-muted p-4">
+                            <pre id="response-content-budgets-update" class="text-sm"></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Delete Budget -->
+        <div id="budget-delete" class="mb-8">
+            <h3 class="text-2xl font-semibold mb-4">Delete Budget</h3>
+            
+            <div class="rounded-lg border border-border bg-card text-card-foreground shadow-sm endpoint-card">
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-3">
+                            <span class="method-badge method-delete">DELETE</span>
+                            <code class="text-lg font-mono">/api/budgets/{id}</code>
+                        </div>
+                        <span class="text-sm text-muted-foreground">Authentication: Bearer Token</span>
+                    </div>
+                    
+                    <p class="text-muted-foreground mb-6">Permanently delete a budget and all its associated data</p>
+                    
+                    <div class="grid lg:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="text-lg font-semibold mb-3">Test this endpoint</h4>
+                            
+                            <div class="rounded-lg border border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950/30 p-4 mb-4">
+                                <div class="flex items-start space-x-3">
+                                    <div class="flex-shrink-0">
+                                        <svg class="h-5 w-5 text-red-600 dark:text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-medium text-red-900 dark:text-red-100">
+                                            Warning: Permanent Action
+                                        </p>
+                                        <p class="text-sm text-red-700 dark:text-red-300 mt-1">
+                                            This action cannot be undone. The budget will be permanently deleted from your account.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="rounded-lg border border-border bg-muted/30 p-4">
+                                <h5 class="font-medium mb-3">Test this endpoint</h5>
+                                <form onsubmit="testEndpoint(event, 'budgets-delete')" class="space-y-3">
+                                    <input name="budget_id" type="number" placeholder="Budget ID to delete" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" required>
+                                    <div class="flex items-center space-x-2">
+                                        <input type="checkbox" id="confirm-delete-budget" required class="rounded border-input">
+                                        <label for="confirm-delete-budget" class="text-sm font-medium leading-none text-red-600 dark:text-red-400">I understand this action cannot be undone</label>
+                                    </div>
+                                    <button type="submit" class="w-full inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-red-600 text-white hover:bg-red-700 h-10 px-4 py-2">
+                                        Delete Budget
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h4 class="text-lg font-semibold mb-3">Example Response</h4>
+                            <pre class="text-xs"><code>{
+  "success": true,
+  "message": "Budget deleted successfully."
+}</code></pre>
+                        </div>
+                    </div>
+                    
+                    <div id="response-budgets-delete" class="mt-6 hidden">
+                        <h4 class="text-lg font-semibold mb-3">Response</h4>
+                        <div class="response-container rounded border bg-muted p-4">
+                            <pre id="response-content-budgets-delete" class="text-sm"></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Testing Guide -->
     <div class="mb-12">
         <h2 id="testing-guide" class="scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight mb-6">
@@ -1391,11 +2713,44 @@ curl -X PUT {{ url('/api/profile') }} \
             'user': { url: '/api/user', method: 'GET' },
             'profile': { url: '/api/profile', method: 'PUT' },
             'password': { url: '/api/password', method: 'PUT' },
-            'logout': { url: '/api/logout', method: 'POST' }
+            'logout': { url: '/api/logout', method: 'POST' },
+            'delete-account': { url: '/api/account', method: 'DELETE' },
+            'accounts-list': { url: '/api/accounts', method: 'GET' },
+            'accounts-create': { url: '/api/accounts', method: 'POST' },
+            'accounts-show': { url: '/api/accounts/{id}', method: 'GET' },
+            'accounts-update': { url: '/api/accounts/{id}', method: 'PUT' },
+            'accounts-delete': { url: '/api/accounts/{id}', method: 'DELETE' },
+            'categories-list': { url: '/api/categories', method: 'GET' },
+            'categories-create': { url: '/api/categories', method: 'POST' },
+            'categories-show': { url: '/api/categories/{id}', method: 'GET' },
+            'transactions-list': { url: '/api/transactions', method: 'GET' },
+            'transactions-create': { url: '/api/transactions', method: 'POST' },
+            'budgets-list': { url: '/api/budgets', method: 'GET' },
+            'budgets-create': { url: '/api/budgets', method: 'POST' },
+            'budgets-update': { url: '/api/budgets/{id}', method: 'PUT' },
+            'budgets-delete': { url: '/api/budgets/{id}', method: 'DELETE' }
         };
         
         const config = endpoints[endpoint];
         if (!config) return;
+        
+        // Handle ID replacement in URLs
+        let url = config.url;
+        if (url.includes('{id}')) {
+            if (data.account_id) {
+                url = url.replace('{id}', data.account_id);
+                delete data.account_id; // Remove from request body
+            } else if (data.category_id) {
+                url = url.replace('{id}', data.category_id);
+                delete data.category_id; // Remove from request body
+            } else if (data.transaction_id) {
+                url = url.replace('{id}', data.transaction_id);
+                delete data.transaction_id; // Remove from request body
+            } else if (data.budget_id) {
+                url = url.replace('{id}', data.budget_id);
+                delete data.budget_id; // Remove from request body
+            }
+        }
         
         const headers = {
             'Accept': 'application/json',
@@ -1407,10 +2762,10 @@ curl -X PUT {{ url('/api/profile') }} \
         }
         
         try {
-            const response = await fetch(config.url, {
+            const response = await fetch(url, {
                 method: config.method,
                 headers: headers,
-                body: config.method !== 'GET' ? JSON.stringify(data) : undefined
+                body: config.method !== 'GET' && config.method !== 'DELETE' ? JSON.stringify(data) : undefined
             });
             
             const result = await response.json();
@@ -1504,24 +2859,152 @@ curl -X PUT {{ url('/api/profile') }} \
         headings.forEach(heading => observer.observe(heading));
     });
 
-    // Navigation link active states
+    // Navigation link active states and section management
     document.addEventListener('DOMContentLoaded', () => {
         const navLinks = document.querySelectorAll('.nav-link');
+        const sectionButtons = document.querySelectorAll('button[class*="font-semibold"]');
+        let isManualNavigation = false; // Flag to prevent scroll spy interference
+        
+        // Map sections to their related hash fragments  
+        const sectionMap = {
+            'token-auth': 'auth',
+            'new-features': 'features', 
+            'register': 'user',
+            'login': 'user',
+            'get-user': 'user',
+            'update-profile': 'user',
+            'update-password': 'user',
+            'logout': 'user',
+            'delete-account': 'user',
+            'account-management': 'account',
+            'category-management': 'category',
+            'transaction-management': 'transaction',
+            'budget-management': 'budget',
+            'testing-guide': 'testing',
+            'examples': 'testing'
+        };
+
         const updateActiveNavLinks = () => {
-            const currentHash = window.location.hash;
+            const currentHash = window.location.hash.replace('#', '');
+            const activeSection = sectionMap[currentHash];
+            
+            // Reset all nav links
             navLinks.forEach(link => {
-                if (link.getAttribute('href') === currentHash) {
-                    link.classList.remove('text-muted-foreground');
-                    link.classList.add('bg-accent', 'text-accent-foreground');
-                } else {
-                    link.classList.add('text-muted-foreground');
-                    link.classList.remove('bg-accent', 'text-accent-foreground');
-                }
+                link.classList.remove('active', 'bg-accent', 'text-accent-foreground');
+                link.classList.add('text-muted-foreground');
             });
+
+            // Reset all section buttons
+            sectionButtons.forEach(button => {
+                button.classList.remove('section-button-active');
+            });
+
+            // Highlight active nav link
+            if (currentHash) {
+                navLinks.forEach(link => {
+                    if (link.getAttribute('href') === '#' + currentHash) {
+                        link.classList.remove('text-muted-foreground');
+                        link.classList.add('active');
+                    }
+                });
+
+                // Highlight parent section button if a child is active
+                if (activeSection) {
+                    sectionButtons.forEach(button => {
+                        const buttonText = button.textContent.toLowerCase();
+                        if ((activeSection === 'auth' && buttonText.includes('authentication')) ||
+                            (activeSection === 'features' && buttonText.includes('new features')) ||
+                            (activeSection === 'user' && buttonText.includes('user management')) ||
+                            (activeSection === 'account' && buttonText.includes('account management')) ||
+                            (activeSection === 'category' && buttonText.includes('category management')) ||
+                            (activeSection === 'transaction' && buttonText.includes('transaction management')) ||
+                            (activeSection === 'budget' && buttonText.includes('budget management')) ||
+                            (activeSection === 'testing' && buttonText.includes('interactive testing'))) {
+                            
+                            button.classList.add('section-button-active');
+                        }
+                    });
+                }
+            }
         };
 
         updateActiveNavLinks();
         window.addEventListener('hashchange', updateActiveNavLinks);
+        
+        // Handle clicks on nav links to update hash and active states immediately
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                
+                // Set flag to prevent scroll spy interference
+                isManualNavigation = true;
+                
+                const targetHash = link.getAttribute('href');
+                const targetId = targetHash.replace('#', '');
+                
+                // Update the URL hash
+                window.location.hash = targetHash;
+                
+                // Immediately update active states
+                updateActiveNavLinks();
+                
+                // Scroll to the target element smoothly
+                const targetElement = document.getElementById(targetId);
+                if (targetElement) {
+                    targetElement.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                    
+                    // Reset flag after scroll completes
+                    setTimeout(() => {
+                        isManualNavigation = false;
+                    }, 1000);
+                }
+            });
+        });
+
+        // Create a modified intersection observer that respects manual navigation
+        const createScrollSpy = () => {
+            const headings = document.querySelectorAll('h2[id], h3[id], h4[id]');
+            
+            let observer = new IntersectionObserver((entries) => {
+                // Don't interfere with manual navigation
+                if (isManualNavigation) return;
+                
+                // Find the entry that is most visible
+                let mostVisible = null;
+                let maxRatio = 0;
+                
+                entries.forEach(entry => {
+                    if (entry.isIntersecting && entry.intersectionRatio > maxRatio) {
+                        maxRatio = entry.intersectionRatio;
+                        mostVisible = entry;
+                    }
+                });
+                
+                if (mostVisible) {
+                    const targetId = mostVisible.target.id;
+                    if (window.location.hash !== '#' + targetId) {
+                        history.replaceState(null, null, '#' + targetId);
+                        updateActiveNavLinks();
+                    }
+                }
+            }, {
+                rootMargin: '-10% 0% -60% 0%', // Adjusted for better detection
+                threshold: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
+            });
+
+            headings.forEach(heading => observer.observe(heading));
+        };
+        
+        // Initialize scroll spy
+        createScrollSpy();
+
+        // Also update on page load with hash
+        if (window.location.hash) {
+            setTimeout(updateActiveNavLinks, 100);
+        }
     });
 </script>
 @endpush

@@ -64,6 +64,23 @@ class DashboardController extends Controller
             ->where('end_date', '>=', now())
             ->get();
             
+        // Return JSON for API requests
+        if (request()->expectsJson() || request()->is('api/*')) {
+            return response()->json([
+                'success' => true,
+                'dashboard' => [
+                    'total_income' => $totalIncome,
+                    'total_expenses' => $totalExpenses,
+                    'net_income' => $netIncome,
+                    'accounts' => $accounts,
+                    'recent_transactions' => $recentTransactions,
+                    'expenses_by_category' => $expensesByCategory,
+                    'active_budgets' => $activeBudgets,
+                    'current_month' => $currentMonth
+                ]
+            ]);
+        }
+        
         return view('dashboard', compact(
             'totalIncome',
             'totalExpenses', 

@@ -53,9 +53,9 @@ Comprehensive test suite ensures reliability and maintainability.
 Here's how easy it is to create a beautiful component:
 
 <x-docs.code language="php" title="Example Component Usage">
-<x-button variant="primary" size="lg">
+<button type="button" class="inline-flex items-center justify-center rounded-md text-base font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-11 px-8">
     Click me!
-</x-button>
+</button>
 </x-docs.code>
 
 ## Architecture Overview

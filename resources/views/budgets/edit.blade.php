@@ -1,13 +1,6 @@
 @extends('layouts.base')
 
-@section('title', 'Edit Budget - ' . config('ap                                <button type="button"
-                                        onclick="openCategoryModal()"
-                                        class="px-3 py-2 text-sm bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-md border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 transition-colors flex items-center"
-                                        title="Create new expense category">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                                    </svg>
-                                </button>)
+@section('title', 'Edit Budget - ' . config('app.name'))
 @section('app-name', 'Budget Tracker')
 
 @section('content')

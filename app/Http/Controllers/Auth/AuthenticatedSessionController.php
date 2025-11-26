@@ -47,8 +47,21 @@ class AuthenticatedSessionController extends Controller
     /**
      * Destroy an authenticated session.
      */
-    public function destroy(Request $request): RedirectResponse
+    public function destroy(Request $request)
     {
+        // Check if this is an API request
+        if ($request->expectsJson() || $request->is('api/*')) {
+            // For API requests, revoke the current token
+            if ($request->user() && $request->user()->currentAccessToken()) {
+                $request->user()->currentAccessToken()->delete();
+            }
+            
+            return response()->json([
+                'message' => 'Logged out successfully'
+            ]);
+        }
+
+        // Web request - existing behavior
         Auth::guard('web')->logout();
 
         $request->session()->invalidate();
