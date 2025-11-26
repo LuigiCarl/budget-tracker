@@ -18,6 +18,15 @@ class AccountController extends Controller
         $accounts = \App\Models\Account::where('user_id', Auth::id())
             ->withCount('transactions')
             ->get();
+
+        // Return JSON for API requests
+        if (request()->expectsJson() || request()->is('api/*')) {
+            return response()->json([
+                'success' => true,
+                'accounts' => $accounts
+            ]);
+        }
+        
         return view('accounts.index', compact('accounts'));
     }
 
@@ -35,12 +44,31 @@ class AccountController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'type' => 'required|in:cash,checking,savings,credit_card,investment',
-            'balance' => 'required|numeric',
-            'description' => 'nullable|string|max:500',
-        ]);
+        // Handle validation for API requests
+        if ($request->expectsJson() || $request->is('api/*')) {
+            $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+                'name' => 'required|string|max:255',
+                'type' => 'required|in:cash,bank,checking,savings,credit_card,investment',
+                'balance' => 'required|numeric',
+                'description' => 'nullable|string|max:500',
+            ]);
+            
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+        } else {
+            // Web validation
+            $request->validate([
+                'name' => 'required|string|max:255',
+                'type' => 'required|in:cash,bank,checking,savings,credit_card,investment',
+                'balance' => 'required|numeric',
+                'description' => 'nullable|string|max:500',
+            ]);
+        }
 
         $account = \App\Models\Account::create([
             'user_id' => Auth::id(),
@@ -50,8 +78,8 @@ class AccountController extends Controller
             'description' => $request->description,
         ]);
 
-        // Check if this is an AJAX request
-        if ($request->expectsJson()) {
+        // Return JSON for API requests
+        if ($request->expectsJson() || $request->is('api/*')) {
             return response()->json([
                 'success' => true,
                 'account' => $account,
@@ -76,6 +104,15 @@ class AccountController extends Controller
             ->orderBy('date', 'desc')
             ->orderBy('created_at', 'desc')
             ->paginate(20);
+
+        // Return JSON for API requests
+        if (request()->expectsJson() || request()->is('api/*')) {
+            return response()->json([
+                'success' => true,
+                'account' => $account,
+                'transactions' => $transactions
+            ]);
+        }
             
         return view('accounts.show', compact('account', 'transactions'));
     }
@@ -98,12 +135,31 @@ class AccountController extends Controller
     {
         $account = \App\Models\Account::where('user_id', Auth::id())->findOrFail($id);
         
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'type' => 'required|in:cash,bank,credit_card',
-            'balance' => 'required|numeric|min:0',
-            'description' => 'nullable|string|max:500',
-        ]);
+        // Handle validation for API requests
+        if (request()->expectsJson() || request()->is('api/*')) {
+            $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+                'name' => 'required|string|max:255',
+                'type' => 'required|in:cash,bank,checking,savings,credit_card,investment',
+                'balance' => 'required|numeric|min:0',
+                'description' => 'nullable|string|max:500',
+            ]);
+            
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+        } else {
+            // Web validation
+            $request->validate([
+                'name' => 'required|string|max:255',
+                'type' => 'required|in:cash,bank,checking,savings,credit_card,investment',
+                'balance' => 'required|numeric|min:0',
+                'description' => 'nullable|string|max:500',
+            ]);
+        }
 
         $account->update([
             'name' => $request->name,
@@ -111,6 +167,15 @@ class AccountController extends Controller
             'balance' => $request->balance,
             'description' => $request->description,
         ]);
+
+        // Return JSON for API requests
+        if (request()->expectsJson() || request()->is('api/*')) {
+            return response()->json([
+                'success' => true,
+                'account' => $account->fresh(),
+                'message' => 'Account updated successfully.'
+            ]);
+        }
 
         return redirect()->route('accounts.show', $account)->with('success', 'Account updated successfully.');
     }
@@ -123,10 +188,24 @@ class AccountController extends Controller
         $account = \App\Models\Account::where('user_id', Auth::id())->findOrFail($id);
         
         if ($account->transactions()->count() > 0) {
+            if (request()->expectsJson() || request()->is('api/*')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Cannot delete account with existing transactions.'
+                ], 400);
+            }
             return redirect()->route('accounts.index')->with('error', 'Cannot delete account with existing transactions.');
         }
         
         $account->delete();
+
+        // Return JSON for API requests
+        if (request()->expectsJson() || request()->is('api/*')) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Account deleted successfully.'
+            ]);
+        }
 
         return redirect()->route('accounts.index')->with('success', 'Account deleted successfully.');
     }

@@ -24,9 +24,19 @@ class ProfileController extends Controller
     }
 
     /**
+     * Get the user's profile information via API.
+     */
+    public function show(Request $request)
+    {
+        return response()->json([
+            'user' => $request->user()
+        ]);
+    }
+
+    /**
      * Update the user's profile information.
      */
-    public function update(ProfileUpdateRequest $request): RedirectResponse
+    public function update(ProfileUpdateRequest $request)
     {
         $request->user()->fill($request->validated());
 
@@ -35,6 +45,14 @@ class ProfileController extends Controller
         }
 
         $request->user()->save();
+
+        // Return JSON for API requests
+        if ($request->expectsJson() || $request->is('api/*')) {
+            return response()->json([
+                'message' => 'Profile updated successfully',
+                'user' => $request->user()->fresh()
+            ]);
+        }
 
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }
@@ -102,6 +120,28 @@ class ProfileController extends Controller
 
         return response()->json([
             'message' => 'Password updated successfully'
+        ]);
+    }
+
+    /**
+     * Delete the user's account via API.
+     */
+    public function deleteAccount(Request $request)
+    {
+        $request->validate([
+            'password' => ['required', 'current_password'],
+        ]);
+
+        $user = $request->user();
+        
+        // Revoke all tokens
+        $user->tokens()->delete();
+        
+        // Delete the user account
+        $user->delete();
+
+        return response()->json([
+            'message' => 'Account deleted successfully'
         ]);
     }
 }

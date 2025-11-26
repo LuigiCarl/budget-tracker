@@ -19,6 +19,15 @@ class CategoryController extends Controller
         $categories = \App\Models\Category::where('user_id', Auth::id())
             ->withCount(['transactions', 'budgets'])
             ->get();
+
+        // Return JSON for API requests
+        if (request()->expectsJson() || request()->is('api/*')) {
+            return response()->json([
+                'success' => true,
+                'categories' => $categories
+            ]);
+        }
+        
         return view('categories.index', compact('categories'));
     }
 
@@ -29,6 +38,16 @@ class CategoryController extends Controller
     {
         $typeOptions = Category::getTypeOptions();
         $defaultType = $request->get('type', 'expense'); // Default to expense if type parameter is provided
+        
+        // Return JSON for API requests
+        if (request()->expectsJson() || request()->is('api/*')) {
+            return response()->json([
+                'success' => true,
+                'type_options' => $typeOptions,
+                'default_type' => $defaultType
+            ]);
+        }
+        
         return view('categories.create', compact('typeOptions', 'defaultType'));
     }
 
@@ -65,8 +84,8 @@ class CategoryController extends Controller
             $category->setAsDefault();
         }
 
-        // Check if this is an AJAX request
-        if ($request->expectsJson()) {
+        // Return JSON for API requests
+        if ($request->expectsJson() || $request->is('api/*')) {
             return response()->json([
                 'success' => true,
                 'category' => $category,
@@ -82,7 +101,6 @@ class CategoryController extends Controller
      */
     public function show($id)
     {
-        // $this->authorize('view', $category);
         $category = Category::where('user_id', Auth::id())->findOrFail($id);
         
         $category->loadCount('transactions');
@@ -99,6 +117,17 @@ class CategoryController extends Controller
             ->where('start_date', '<=', now())
             ->where('end_date', '>=', now())
             ->count();
+
+        // Return JSON for API requests
+        if (request()->expectsJson() || request()->is('api/*')) {
+            return response()->json([
+                'success' => true,
+                'category' => $category,
+                'recent_transactions' => $recentTransactions,
+                'total_amount' => $totalAmount,
+                'active_budgets' => $activeBudgets
+            ]);
+        }
             
         return view('categories.show', compact('category', 'recentTransactions', 'totalAmount', 'activeBudgets'));
     }
@@ -108,10 +137,19 @@ class CategoryController extends Controller
      */
     public function edit($id)
     {
-        // $this->authorize('update', $category);
         $category = Category::where('user_id', Auth::id())->findOrFail($id);
         
         $typeOptions = Category::getTypeOptions();
+        
+        // Return JSON for API requests
+        if (request()->expectsJson() || request()->is('api/*')) {
+            return response()->json([
+                'success' => true,
+                'category' => $category,
+                'type_options' => $typeOptions
+            ]);
+        }
+        
         return view('categories.edit', compact('category', 'typeOptions'));
     }
 
@@ -120,7 +158,6 @@ class CategoryController extends Controller
      */
     public function update(Request $request, $id)
     {
-        // $this->authorize('update', $category);
         $category = Category::where('user_id', Auth::id())->findOrFail($id);
         
         $request->validate([
@@ -150,6 +187,15 @@ class CategoryController extends Controller
             $category->setAsDefault();
         }
 
+        // Return JSON for API requests
+        if (request()->expectsJson() || request()->is('api/*')) {
+            return response()->json([
+                'success' => true,
+                'category' => $category->fresh(),
+                'message' => 'Category updated successfully.'
+            ]);
+        }
+
         return redirect()->route('categories.index')->with('success', 'Category updated successfully.');
     }
 
@@ -158,18 +204,37 @@ class CategoryController extends Controller
      */
     public function destroy($id)
     {
-        // $this->authorize('delete', $category);
         $category = Category::where('user_id', Auth::id())->findOrFail($id);
         
         if ($category->transactions()->count() > 0) {
+            if (request()->expectsJson() || request()->is('api/*')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Cannot delete category with existing transactions.'
+                ], 400);
+            }
             return redirect()->route('categories.index')->with('error', 'Cannot delete category with existing transactions.');
         }
         
         if ($category->budgets()->count() > 0) {
+            if (request()->expectsJson() || request()->is('api/*')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Cannot delete category with existing budgets.'
+                ], 400);
+            }
             return redirect()->route('categories.index')->with('error', 'Cannot delete category with existing budgets.');
         }
         
         $category->delete();
+
+        // Return JSON for API requests
+        if (request()->expectsJson() || request()->is('api/*')) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Category deleted successfully.'
+            ]);
+        }
 
         return redirect()->route('categories.index')->with('success', 'Category deleted successfully.');
     }

@@ -25,6 +25,14 @@ class TransactionController extends Controller
             ->orderBy('date', 'desc')
             ->orderBy('created_at', 'desc')
             ->paginate(20);
+
+        // Return JSON for API requests
+        if (request()->expectsJson() || request()->is('api/*')) {
+            return response()->json([
+                'success' => true,
+                'transactions' => $transactions
+            ]);
+        }
             
         return view('transactions.index', compact('transactions'));
     }
@@ -38,11 +46,29 @@ class TransactionController extends Controller
         $categories = \App\Models\Category::where('user_id', Auth::id())->get();
         
         if ($accounts->isEmpty()) {
+            if (request()->expectsJson() || request()->is('api/*')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'You need to create at least one account before adding transactions.',
+                    'errors' => [
+                        'account_id' => ['You need to create at least one account before adding transactions.']
+                    ]
+                ], 422);
+            }
             return redirect()->route('accounts.create')
                 ->with('error', 'You need to create at least one account before adding transactions.');
         }
         
         if ($categories->isEmpty()) {
+            if (request()->expectsJson() || request()->is('api/*')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'You need to create at least one category before adding transactions.',
+                    'errors' => [
+                        'category_id' => ['You need to create at least one category before adding transactions.']
+                    ]
+                ], 422);
+            }
             return redirect()->route('categories.create')
                 ->with('error', 'You need to create at least one category before adding transactions.');
         }
@@ -50,6 +76,17 @@ class TransactionController extends Controller
         // Get default categories for both income and expense
         $defaultIncomeCategory = \App\Models\Category::getDefaultForUser(Auth::id(), 'income');
         $defaultExpenseCategory = \App\Models\Category::getDefaultForUser(Auth::id(), 'expense');
+        
+        // Return JSON for API requests
+        if (request()->expectsJson() || request()->is('api/*')) {
+            return response()->json([
+                'success' => true,
+                'accounts' => $accounts,
+                'categories' => $categories,
+                'default_income_category' => $defaultIncomeCategory,
+                'default_expense_category' => $defaultExpenseCategory
+            ]);
+        }
         
         return view('transactions.create', compact('accounts', 'categories', 'defaultIncomeCategory', 'defaultExpenseCategory'));
     }
@@ -75,6 +112,15 @@ class TransactionController extends Controller
 
         // Verify category type matches transaction type
         if ($category->type !== $request->type) {
+            if (request()->expectsJson() || request()->is('api/*')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Category type must match transaction type.',
+                    'errors' => [
+                        'category_id' => ['Category type must match transaction type.']
+                    ]
+                ], 422);
+            }
             return back()->withErrors(['category_id' => 'Category type must match transaction type.']);
         }
 
@@ -97,8 +143,18 @@ class TransactionController extends Controller
                     
                     if ($isLimiterBudget) {
                         // Hard limit - prevent the transaction
+                        $errorMessage = "This expense exceeds your budget limit for {$category->name}. Remaining budget: $" . number_format($remaining, 2);
+                        if (request()->expectsJson() || request()->is('api/*')) {
+                            return response()->json([
+                                'success' => false,
+                                'message' => $errorMessage,
+                                'errors' => [
+                                    'amount' => [$errorMessage]
+                                ]
+                            ], 422);
+                        }
                         return back()->withErrors([
-                            'amount' => "This expense exceeds your budget limit for {$category->name}. Remaining budget: $" . number_format($remaining, 2)
+                            'amount' => $errorMessage
                         ]);
                     } else {
                         // Soft limit - allow but warn
@@ -108,7 +164,8 @@ class TransactionController extends Controller
             }
         }
 
-        DB::transaction(function () use ($request, $account) {
+        $transaction = null;
+        DB::transaction(function () use ($request, $account, &$transaction) {
             // Create the transaction
             $transaction = \App\Models\Transaction::create([
                 'user_id' => Auth::id(),
@@ -133,6 +190,15 @@ class TransactionController extends Controller
             $successMessage .= ' Warning: ' . $budgetWarning;
         }
 
+        // Return JSON for API requests
+        if (request()->expectsJson() || request()->is('api/*')) {
+            return response()->json([
+                'success' => true,
+                'transaction' => $transaction,
+                'message' => $successMessage
+            ], 201);
+        }
+
         return redirect()->route('transactions.index')->with('success', $successMessage);
     }
 
@@ -141,10 +207,17 @@ class TransactionController extends Controller
      */
     public function show($id)
     {
-        // $this->authorize('view', $transaction);
         $transaction = \App\Models\Transaction::where('user_id', Auth::id())
             ->with(['account', 'category'])
             ->findOrFail($id);
+
+        // Return JSON for API requests
+        if (request()->expectsJson() || request()->is('api/*')) {
+            return response()->json([
+                'success' => true,
+                'transaction' => $transaction
+            ]);
+        }
         
         return view('transactions.show', compact('transaction'));
     }
@@ -154,11 +227,20 @@ class TransactionController extends Controller
      */
     public function edit($id)
     {
-        // $this->authorize('update', $transaction);
         $transaction = \App\Models\Transaction::where('user_id', Auth::id())->findOrFail($id);
         
         $accounts = \App\Models\Account::where('user_id', Auth::id())->get();
         $categories = \App\Models\Category::where('user_id', Auth::id())->get();
+        
+        // Return JSON for API requests
+        if (request()->expectsJson() || request()->is('api/*')) {
+            return response()->json([
+                'success' => true,
+                'transaction' => $transaction,
+                'accounts' => $accounts,
+                'categories' => $categories
+            ]);
+        }
         
         return view('transactions.edit', compact('transaction', 'accounts', 'categories'));
     }
@@ -168,7 +250,6 @@ class TransactionController extends Controller
      */
     public function update(Request $request, $id)
     {
-        // $this->authorize('update', $transaction);
         $transaction = \App\Models\Transaction::where('user_id', Auth::id())->findOrFail($id);
         
         $request->validate([
@@ -186,10 +267,19 @@ class TransactionController extends Controller
 
         // Verify category type matches transaction type
         if ($category->type !== $request->type) {
+            if (request()->expectsJson() || request()->is('api/*')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Category type must match transaction type.',
+                    'errors' => [
+                        'category_id' => ['Category type must match transaction type.']
+                    ]
+                ], 422);
+            }
             return back()->withErrors(['category_id' => 'Category type must match transaction type.']);
         }
 
-        DB::transaction(function () use ($request, $transaction, $account) {
+        DB::transaction(function () use ($request, $account, $transaction) {
             // Reverse the old transaction's effect on account balance
             $oldAccount = $transaction->account;
             if ($transaction->type === 'income') {
@@ -216,6 +306,15 @@ class TransactionController extends Controller
             }
         });
 
+        // Return JSON for API requests
+        if (request()->expectsJson() || request()->is('api/*')) {
+            return response()->json([
+                'success' => true,
+                'transaction' => $transaction->fresh(),
+                'message' => 'Transaction updated successfully.'
+            ]);
+        }
+
         return redirect()->route('transactions.index')->with('success', 'Transaction updated successfully.');
     }
 
@@ -224,7 +323,6 @@ class TransactionController extends Controller
      */
     public function destroy($id)
     {
-        // $this->authorize('delete', $transaction);
         $transaction = \App\Models\Transaction::where('user_id', Auth::id())->findOrFail($id);
         
         DB::transaction(function () use ($transaction) {
@@ -238,6 +336,14 @@ class TransactionController extends Controller
 
             $transaction->delete();
         });
+
+        // Return JSON for API requests
+        if (request()->expectsJson() || request()->is('api/*')) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Transaction deleted successfully.'
+            ]);
+        }
 
         return redirect()->route('transactions.index')->with('success', 'Transaction deleted successfully.');
     }

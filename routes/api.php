@@ -5,6 +5,12 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\AccountController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\TransactionController;
+use App\Http\Controllers\BudgetController;
+use App\Http\Controllers\AnalyticsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -33,6 +39,56 @@ Route::middleware('auth:sanctum')->group(function () {
     
     // Update user password
     Route::put('/password', [ProfileController::class, 'updatePassword']);
+    
+    // Delete user account
+    Route::delete('/account', [ProfileController::class, 'deleteAccount']);
+    
+    // Dashboard
+    Route::get('/dashboard', [DashboardController::class, 'index']);
+    
+    // Analytics API
+    Route::prefix('analytics')->group(function () {
+        Route::get('/monthly', [AnalyticsController::class, 'monthly']);
+        Route::get('/trends', [AnalyticsController::class, 'trends']);
+        Route::get('/category-breakdown', [AnalyticsController::class, 'categoryBreakdown']);
+        Route::get('/budget-performance', [AnalyticsController::class, 'budgetPerformance']);
+    });
+    
+    // Accounts API
+    Route::apiResource('accounts', AccountController::class)->names([
+        'index' => 'api.accounts.index',
+        'store' => 'api.accounts.store',
+        'show' => 'api.accounts.show',
+        'update' => 'api.accounts.update',
+        'destroy' => 'api.accounts.destroy',
+    ]);
+    
+    // Categories API
+    Route::apiResource('categories', CategoryController::class)->names([
+        'index' => 'api.categories.index',
+        'store' => 'api.categories.store',
+        'show' => 'api.categories.show',
+        'update' => 'api.categories.update',
+        'destroy' => 'api.categories.destroy',
+    ]);
+    
+    // Transactions API
+    Route::apiResource('transactions', TransactionController::class)->names([
+        'index' => 'api.transactions.index',
+        'store' => 'api.transactions.store',
+        'show' => 'api.transactions.show',
+        'update' => 'api.transactions.update',
+        'destroy' => 'api.transactions.destroy',
+    ]);
+    
+    // Budgets API
+    Route::apiResource('budgets', BudgetController::class)->names([
+        'index' => 'api.budgets.index',
+        'store' => 'api.budgets.store',
+        'show' => 'api.budgets.show',
+        'update' => 'api.budgets.update',
+        'destroy' => 'api.budgets.destroy',
+    ]);
     
     // Create new API token
     Route::post('/tokens', function (Request $request) {
