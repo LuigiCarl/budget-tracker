@@ -3,6 +3,12 @@ set -e
 
 echo "Starting Laravel application..."
 
+# Create .env file if it doesn't exist
+if [ ! -f .env ]; then
+    echo "Creating .env file from example..."
+    cp .env.example .env
+fi
+
 # Generate APP_KEY if not set
 if [ -z "$APP_KEY" ] || [ "$APP_KEY" = "base64:" ]; then
     echo "Generating APP_KEY..."
