@@ -5,10 +5,20 @@ services:
   # Main Laravel Web Application
   - type: web
     name: budget-tracker
-    env: docker
+    env: php
+    region: oregon
     plan: starter # Change to 'standard' or 'pro' for production
+    buildCommand: |
+      composer install --no-dev --optimize-autoloader &&
+      npm ci &&
+      npm run build
+    startCommand: |
+      php artisan migrate --force &&
+      php artisan config:cache &&
+      php artisan route:cache &&
+      php artisan view:cache &&
+      php artisan serve --host 0.0.0.0 --port $PORT
     healthCheckPath: /up
-    dockerfilePath: ./Dockerfile
     envVars:
       # Application Settings
       - key: APP_NAME
