@@ -46,6 +46,7 @@ RUN npm run build
 
 # Set permissions
 RUN chmod -R 775 storage bootstrap/cache
+RUN chmod -R 755 public
 RUN chmod +x startup.sh
 
 # Expose port

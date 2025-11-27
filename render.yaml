@@ -19,6 +19,8 @@ services:
         generateValue: true # Render will generate this automatically
       - key: APP_FORCE_HTTPS
         value: true
+      - key: ASSET_URL
+        value: https://budget-tracker-gcjt.onrender.com
       
       # Database Configuration (links to postgres service below)
       - key: DB_CONNECTION
