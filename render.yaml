@@ -1,0 +1,99 @@
+# Render Blueprint for Laravel Budget Tracker
+# This file defines infrastructure as code for automatic deployment
+
+services:
+  # Main Laravel Web Application
+  - type: web
+    name: budget-tracker
+    env: php
+    plan: starter # Change to 'standard' or 'pro' for production
+    buildCommand: |
+      composer install --no-dev --optimize-autoloader &&
+      npm ci &&
+      npm run build &&
+      php artisan config:cache &&
+      php artisan route:cache &&
+      php artisan view:cache
+    startCommand: php artisan serve --host 0.0.0.0 --port $PORT
+    healthCheckPath: /up
+    envVars:
+      # Application Settings
+      - key: APP_NAME
+        value: Budget Tracker
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false
+      - key: APP_URL
+        sync: false # You'll need to set this to your Render URL
+      - key: APP_KEY
+        generateValue: true # Render will generate this automatically
+      
+      # Database Configuration (links to postgres service below)
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_HOST
+        fromDatabase:
+          name: budget-tracker-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: budget-tracker-db
+          property: port
+      - key: DB_DATABASE
+        fromDatabase:
+          name: budget-tracker-db
+          property: database
+      - key: DB_USERNAME
+        fromDatabase:
+          name: budget-tracker-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: budget-tracker-db
+          property: password
+      
+      # Session & Cache Configuration
+      - key: SESSION_DRIVER
+        value: file
+      - key: SESSION_LIFETIME
+        value: 120
+      - key: CACHE_DRIVER
+        value: file
+      - key: QUEUE_CONNECTION
+        value: sync
+      
+      # Laravel Sanctum for API Authentication
+      - key: SANCTUM_STATEFUL_DOMAINS
+        sync: false # Set to your domain, e.g., "yourdomain.onrender.com"
+      
+      # Mail Configuration (optional - configure if using email features)
+      - key: MAIL_MAILER
+        value: log
+      - key: MAIL_HOST
+        sync: false
+      - key: MAIL_PORT
+        value: 587
+      - key: MAIL_USERNAME
+        sync: false
+      - key: MAIL_PASSWORD
+        sync: false
+      - key: MAIL_ENCRYPTION
+        value: tls
+      - key: MAIL_FROM_ADDRESS
+        sync: false
+      - key: MAIL_FROM_NAME
+        value: Budget Tracker
+
+# Database Service (PostgreSQL)
+databases:
+  - name: budget-tracker-db
+    databaseName: budget_tracker
+    user: budget_user
+    plan: starter # Change to 'standard' for production
+
+# Optional: Redis for sessions/cache (uncomment if needed for production)
+# - type: redis
+#   name: budget-tracker-redis
+#   plan: starter
+#   maxmemoryPolicy: allkeys-lru
