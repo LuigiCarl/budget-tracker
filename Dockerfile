@@ -50,8 +50,8 @@ RUN chmod -R 775 storage bootstrap/cache
 EXPOSE $PORT
 
 # Start command - Generate key if missing, clear config cache, run migrations, then serve
-CMD if [ -z "$APP_KEY" ]; then php artisan key:generate --force; fi && \
-    php artisan config:clear && \
-    php artisan cache:clear && \
-    php artisan migrate --force && \
+CMD php artisan key:generate --force; \
+    php artisan config:clear; \
+    php artisan cache:clear; \
+    php artisan migrate --force; \
     php artisan serve --host=0.0.0.0 --port=$PORT
