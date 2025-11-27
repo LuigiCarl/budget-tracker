@@ -3,23 +3,29 @@ set -e
 
 echo "Starting Laravel application..."
 
-# Create .env file if it doesn't exist
-if [ ! -f .env ]; then
-    echo "Creating .env file from example..."
-    cp .env.example .env
-fi
+# Don't create .env file - use environment variables directly
+# Laravel will read from environment if .env doesn't exist
+
+# Set default values if not provided
+export APP_ENV=${APP_ENV:-production}
+export APP_DEBUG=${APP_DEBUG:-false}
+export LOG_CHANNEL=${LOG_CHANNEL:-stack}
+export SESSION_DRIVER=${SESSION_DRIVER:-file}
+export CACHE_DRIVER=${CACHE_DRIVER:-file}
+export QUEUE_CONNECTION=${QUEUE_CONNECTION:-sync}
 
 # Generate APP_KEY if not set
-if [ -z "$APP_KEY" ] || [ "$APP_KEY" = "base64:" ]; then
+if [ -z "$APP_KEY" ]; then
     echo "Generating APP_KEY..."
-    php artisan key:generate --force --no-interaction
+    # Generate a key and export it
+    export APP_KEY=$(php artisan key:generate --show)
+    echo "APP_KEY generated: $APP_KEY"
 fi
 
-# Clear all caches (don't use database cache clearing)
+# Clear all caches
 echo "Clearing caches..."
 rm -rf bootstrap/cache/*.php
 php artisan config:clear --no-interaction || true
-php artisan cache:clear --no-interaction || true
 php artisan view:clear --no-interaction || true
 php artisan route:clear --no-interaction || true
 
