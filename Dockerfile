@@ -38,6 +38,7 @@ RUN npm ci
 # Copy application code
 COPY . .
 
+# Cache bust: 2025-11-27-fix
 # Complete composer installation
 RUN composer dump-autoload --no-dev --optimize
 
