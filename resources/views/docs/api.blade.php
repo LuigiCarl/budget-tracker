@@ -5,15 +5,42 @@
 
 @section('sidebar')
 <div class="w-full" x-data="{ 
+    overviewSection: true,
     authSection: true,
     featuresSection: true,
     userSection: true,
+    dashboardSection: true,
     accountSection: false,
     categorySection: false,
     transactionSection: false,
     budgetSection: false,
     testingSection: false 
 }">
+    <!-- API Overview Section -->
+    <div class="pb-4">
+        <button @click="overviewSection = !overviewSection" 
+                class="flex w-full items-center justify-between rounded-md border border-transparent px-2 py-1 text-sm font-semibold hover:bg-accent hover:text-accent-foreground">
+            <span>📚 API Overview</span>
+            <svg class="h-3 w-3 transition-transform duration-200" :class="{ 'rotate-90': overviewSection }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+        </button>
+        <div x-show="overviewSection" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 -translate-y-2" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-2" class="ml-4 mt-2 space-y-1 border-l border-border pl-4">
+            <a href="#getting-started" class="nav-link group flex w-full items-center rounded-md border border-transparent px-2 py-1 text-sm hover:bg-accent hover:text-accent-foreground text-muted-foreground">
+                Getting Started
+            </a>
+            <a href="#error-handling" class="nav-link group flex w-full items-center rounded-md border border-transparent px-2 py-1 text-sm hover:bg-accent hover:text-accent-foreground text-muted-foreground">
+                Error Handling
+            </a>
+            <a href="#rate-limiting" class="nav-link group flex w-full items-center rounded-md border border-transparent px-2 py-1 text-sm hover:bg-accent hover:text-accent-foreground text-muted-foreground">
+                Rate Limiting
+            </a>
+            <a href="#pagination" class="nav-link group flex w-full items-center rounded-md border border-transparent px-2 py-1 text-sm hover:bg-accent hover:text-accent-foreground text-muted-foreground">
+                Pagination
+            </a>
+        </div>
+    </div>
+
     <!-- Authentication Section -->
     <div class="pb-4">
         <button @click="authSection = !authSection" 
@@ -24,8 +51,20 @@
             </svg>
         </button>
         <div x-show="authSection" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 -translate-y-2" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-2" class="ml-4 mt-2 space-y-1 border-l border-border pl-4">
+            <a href="#register" class="nav-link group flex w-full items-center rounded-md border border-transparent px-2 py-1 text-sm hover:bg-accent hover:text-accent-foreground text-muted-foreground">
+                <span class="method-badge method-post text-xs">POST</span>
+                <span>/auth/register</span>
+            </a>
+            <a href="#login" class="nav-link group flex w-full items-center rounded-md border border-transparent px-2 py-1 text-sm hover:bg-accent hover:text-accent-foreground text-muted-foreground">
+                <span class="method-badge method-post text-xs">POST</span>
+                <span>/auth/login</span>
+            </a>
+            <a href="#logout" class="nav-link group flex w-full items-center rounded-md border border-transparent px-2 py-1 text-sm hover:bg-accent hover:text-accent-foreground text-muted-foreground">
+                <span class="method-badge method-post text-xs">POST</span>
+                <span>/auth/logout</span>
+            </a>
             <a href="#token-auth" class="nav-link group flex w-full items-center rounded-md border border-transparent px-2 py-1 text-sm hover:bg-accent hover:text-accent-foreground text-muted-foreground">
-                Token Setup
+                Token Setup Guide
             </a>
         </div>
     </div>
@@ -50,32 +89,27 @@
     <div class="pb-4">
         <button @click="userSection = !userSection" 
                 class="flex w-full items-center justify-between rounded-md border border-transparent px-2 py-1 text-sm font-semibold hover:bg-accent hover:text-accent-foreground">
-            <span>👤 User Management</span>
+            <span>👤 Users</span>
             <svg class="h-3 w-3 transition-transform duration-200" :class="{ 'rotate-90': userSection }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
             </svg>
         </button>
         <div x-show="userSection" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 -translate-y-2" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-2" class="ml-4 mt-2 space-y-1 border-l border-border pl-4">
-            <a href="#register" class="nav-link group flex w-full items-center rounded-md border border-transparent px-2 py-1 text-sm hover:bg-accent hover:text-accent-foreground text-muted-foreground">
-                User Registration
-            </a>
-            <a href="#login" class="nav-link group flex w-full items-center rounded-md border border-transparent px-2 py-1 text-sm hover:bg-accent hover:text-accent-foreground text-muted-foreground">
-                User Login
-            </a>
             <a href="#get-user" class="nav-link group flex w-full items-center rounded-md border border-transparent px-2 py-1 text-sm hover:bg-accent hover:text-accent-foreground text-muted-foreground">
-                Get User Profile
+                <span class="method-badge method-get text-xs">GET</span>
+                <span>/user</span>
             </a>
             <a href="#update-profile" class="nav-link group flex w-full items-center rounded-md border border-transparent px-2 py-1 text-sm hover:bg-accent hover:text-accent-foreground text-muted-foreground">
-                Update Profile
+                <span class="method-badge method-put text-xs">PUT</span>
+                <span>/user/profile</span>
             </a>
             <a href="#update-password" class="nav-link group flex w-full items-center rounded-md border border-transparent px-2 py-1 text-sm hover:bg-accent hover:text-accent-foreground text-muted-foreground">
-                Update Password
-            </a>
-            <a href="#logout" class="nav-link group flex w-full items-center rounded-md border border-transparent px-2 py-1 text-sm hover:bg-accent hover:text-accent-foreground text-muted-foreground">
-                Logout
+                <span class="method-badge method-put text-xs">PUT</span>
+                <span>/user/password</span>
             </a>
             <a href="#delete-account" class="nav-link group flex w-full items-center rounded-md border border-transparent px-2 py-1 text-sm hover:bg-accent hover:text-accent-foreground text-muted-foreground">
-                Delete Account
+                <span class="method-badge method-delete text-xs">DEL</span>
+                <span>/user/account</span>
             </a>
         </div>
     </div>
@@ -84,26 +118,31 @@
     <div class="pb-4">
         <button @click="accountSection = !accountSection" 
                 class="flex w-full items-center justify-between rounded-md border border-transparent px-2 py-1 text-sm font-semibold hover:bg-accent hover:text-accent-foreground">
-            <span>💳 Account Management</span>
+            <span>💳 Accounts</span>
             <svg class="h-3 w-3 transition-transform duration-200" :class="{ 'rotate-90': accountSection }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
             </svg>
         </button>
         <div x-show="accountSection" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 -translate-y-2" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-2" class="ml-4 mt-2 space-y-1 border-l border-border pl-4">
             <a href="#account-management" class="nav-link group flex w-full items-center rounded-md border border-transparent px-2 py-1 text-sm hover:bg-accent hover:text-accent-foreground text-muted-foreground">
-                List All Accounts
+                <span class="method-badge method-get text-xs">GET</span>
+                <span>/accounts</span>
             </a>
             <a href="#account-management" class="nav-link group flex w-full items-center rounded-md border border-transparent px-2 py-1 text-sm hover:bg-accent hover:text-accent-foreground text-muted-foreground">
-                Create New Account
+                <span class="method-badge method-post text-xs">POST</span>
+                <span>/accounts</span>
             </a>
             <a href="#account-management" class="nav-link group flex w-full items-center rounded-md border border-transparent px-2 py-1 text-sm hover:bg-accent hover:text-accent-foreground text-muted-foreground">
-                Get Account Details
+                <span class="method-badge method-get text-xs">GET</span>
+                <span>/accounts/{id}</span>
             </a>
             <a href="#account-management" class="nav-link group flex w-full items-center rounded-md border border-transparent px-2 py-1 text-sm hover:bg-accent hover:text-accent-foreground text-muted-foreground">
-                Update Account
+                <span class="method-badge method-put text-xs">PUT</span>
+                <span>/accounts/{id}</span>
             </a>
             <a href="#account-management" class="nav-link group flex w-full items-center rounded-md border border-transparent px-2 py-1 text-sm hover:bg-accent hover:text-accent-foreground text-muted-foreground">
-                Delete Account
+                <span class="method-badge method-delete text-xs">DEL</span>
+                <span>/accounts/{id}</span>
             </a>
         </div>
     </div>
@@ -112,20 +151,31 @@
     <div class="pb-4">
         <button @click="categorySection = !categorySection" 
                 class="flex w-full items-center justify-between rounded-md border border-transparent px-2 py-1 text-sm font-semibold hover:bg-accent hover:text-accent-foreground">
-            <span>🏷️ Category Management</span>
+            <span>🏷️ Categories</span>
             <svg class="h-3 w-3 transition-transform duration-200" :class="{ 'rotate-90': categorySection }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
             </svg>
         </button>
         <div x-show="categorySection" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 -translate-y-2" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-2" class="ml-4 mt-2 space-y-1 border-l border-border pl-4">
             <a href="#category-management" class="nav-link group flex w-full items-center rounded-md border border-transparent px-2 py-1 text-sm hover:bg-accent hover:text-accent-foreground text-muted-foreground">
-                List All Categories
+                <span class="method-badge method-get text-xs">GET</span>
+                <span>/categories</span>
             </a>
             <a href="#category-management" class="nav-link group flex w-full items-center rounded-md border border-transparent px-2 py-1 text-sm hover:bg-accent hover:text-accent-foreground text-muted-foreground">
-                Create New Category
+                <span class="method-badge method-post text-xs">POST</span>
+                <span>/categories</span>
             </a>
             <a href="#category-management" class="nav-link group flex w-full items-center rounded-md border border-transparent px-2 py-1 text-sm hover:bg-accent hover:text-accent-foreground text-muted-foreground">
-                Get Category Analytics
+                <span class="method-badge method-get text-xs">GET</span>
+                <span>/categories/{id}</span>
+            </a>
+            <a href="#category-management" class="nav-link group flex w-full items-center rounded-md border border-transparent px-2 py-1 text-sm hover:bg-accent hover:text-accent-foreground text-muted-foreground">
+                <span class="method-badge method-put text-xs">PUT</span>
+                <span>/categories/{id}</span>
+            </a>
+            <a href="#category-management" class="nav-link group flex w-full items-center rounded-md border border-transparent px-2 py-1 text-sm hover:bg-accent hover:text-accent-foreground text-muted-foreground">
+                <span class="method-badge method-delete text-xs">DEL</span>
+                <span>/categories/{id}</span>
             </a>
         </div>
     </div>
@@ -134,17 +184,31 @@
     <div class="pb-4">
         <button @click="transactionSection = !transactionSection" 
                 class="flex w-full items-center justify-between rounded-md border border-transparent px-2 py-1 text-sm font-semibold hover:bg-accent hover:text-accent-foreground">
-            <span>💸 Transaction Management</span>
+            <span>💸 Transactions</span>
             <svg class="h-3 w-3 transition-transform duration-200" :class="{ 'rotate-90': transactionSection }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
             </svg>
         </button>
         <div x-show="transactionSection" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 -translate-y-2" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-2" class="ml-4 mt-2 space-y-1 border-l border-border pl-4">
             <a href="#transaction-management" class="nav-link group flex w-full items-center rounded-md border border-transparent px-2 py-1 text-sm hover:bg-accent hover:text-accent-foreground text-muted-foreground">
-                List All Transactions
+                <span class="method-badge method-get text-xs">GET</span>
+                <span>/transactions</span>
             </a>
             <a href="#transaction-management" class="nav-link group flex w-full items-center rounded-md border border-transparent px-2 py-1 text-sm hover:bg-accent hover:text-accent-foreground text-muted-foreground">
-                Create New Transaction
+                <span class="method-badge method-post text-xs">POST</span>
+                <span>/transactions</span>
+            </a>
+            <a href="#transaction-management" class="nav-link group flex w-full items-center rounded-md border border-transparent px-2 py-1 text-sm hover:bg-accent hover:text-accent-foreground text-muted-foreground">
+                <span class="method-badge method-get text-xs">GET</span>
+                <span>/transactions/{id}</span>
+            </a>
+            <a href="#transaction-management" class="nav-link group flex w-full items-center rounded-md border border-transparent px-2 py-1 text-sm hover:bg-accent hover:text-accent-foreground text-muted-foreground">
+                <span class="method-badge method-put text-xs">PUT</span>
+                <span>/transactions/{id}</span>
+            </a>
+            <a href="#transaction-management" class="nav-link group flex w-full items-center rounded-md border border-transparent px-2 py-1 text-sm hover:bg-accent hover:text-accent-foreground text-muted-foreground">
+                <span class="method-badge method-delete text-xs">DEL</span>
+                <span>/transactions/{id}</span>
             </a>
         </div>
     </div>
@@ -153,23 +217,60 @@
     <div class="pb-4">
         <button @click="budgetSection = !budgetSection" 
                 class="flex w-full items-center justify-between rounded-md border border-transparent px-2 py-1 text-sm font-semibold hover:bg-accent hover:text-accent-foreground">
-            <span>📊 Budget Management</span>
+            <span>📊 Budgets</span>
             <svg class="h-3 w-3 transition-transform duration-200" :class="{ 'rotate-90': budgetSection }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
             </svg>
         </button>
         <div x-show="budgetSection" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 -translate-y-2" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-2" class="ml-4 mt-2 space-y-1 border-l border-border pl-4">
             <a href="#budget-management" class="nav-link group flex w-full items-center rounded-md border border-transparent px-2 py-1 text-sm hover:bg-accent hover:text-accent-foreground text-muted-foreground">
-                List All Budgets
+                <span class="method-badge method-get text-xs">GET</span>
+                <span>/budgets</span>
             </a>
-            <a href="#budget-create" class="nav-link group flex w-full items-center rounded-md border border-transparent px-2 py-1 text-sm hover:bg-accent hover:text-accent-foreground text-muted-foreground">
-                Create New Budget
+            <a href="#budget-management" class="nav-link group flex w-full items-center rounded-md border border-transparent px-2 py-1 text-sm hover:bg-accent hover:text-accent-foreground text-muted-foreground">
+                <span class="method-badge method-post text-xs">POST</span>
+                <span>/budgets</span>
             </a>
-            <a href="#budget-update" class="nav-link group flex w-full items-center rounded-md border border-transparent px-2 py-1 text-sm hover:bg-accent hover:text-accent-foreground text-muted-foreground">
-                Update Budget
+            <a href="#budget-management" class="nav-link group flex w-full items-center rounded-md border border-transparent px-2 py-1 text-sm hover:bg-accent hover:text-accent-foreground text-muted-foreground">
+                <span class="method-badge method-get text-xs">GET</span>
+                <span>/budgets/{id}</span>
             </a>
-            <a href="#budget-delete" class="nav-link group flex w-full items-center rounded-md border border-transparent px-2 py-1 text-sm hover:bg-accent hover:text-accent-foreground text-muted-foreground">
-                Delete Budget
+            <a href="#budget-management" class="nav-link group flex w-full items-center rounded-md border border-transparent px-2 py-1 text-sm hover:bg-accent hover:text-accent-foreground text-muted-foreground">
+                <span class="method-badge method-put text-xs">PUT</span>
+                <span>/budgets/{id}</span>
+            </a>
+            <a href="#budget-management" class="nav-link group flex w-full items-center rounded-md border border-transparent px-2 py-1 text-sm hover:bg-accent hover:text-accent-foreground text-muted-foreground">
+                <span class="method-badge method-delete text-xs">DEL</span>
+                <span>/budgets/{id}</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Dashboard Analytics Section -->
+    <div class="pb-4">
+        <button @click="dashboardSection = !dashboardSection" 
+                class="flex w-full items-center justify-between rounded-md border border-transparent px-2 py-1 text-sm font-semibold hover:bg-accent hover:text-accent-foreground">
+            <span>📊 Dashboard</span>
+            <svg class="h-3 w-3 transition-transform duration-200" :class="{ 'rotate-90': dashboardSection }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+        </button>
+        <div x-show="dashboardSection" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 -translate-y-2" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-2" class="ml-4 mt-2 space-y-1 border-l border-border pl-4">
+            <a href="#dashboard-stats" class="nav-link group flex w-full items-center rounded-md border border-transparent px-2 py-1 text-sm hover:bg-accent hover:text-accent-foreground text-muted-foreground">
+                <span class="method-badge method-get text-xs">GET</span>
+                <span>/dashboard/stats</span>
+            </a>
+            <a href="#recent-transactions" class="nav-link group flex w-full items-center rounded-md border border-transparent px-2 py-1 text-sm hover:bg-accent hover:text-accent-foreground text-muted-foreground">
+                <span class="method-badge method-get text-xs">GET</span>
+                <span>/dashboard/recent-transactions</span>
+            </a>
+            <a href="#monthly-analytics" class="nav-link group flex w-full items-center rounded-md border border-transparent px-2 py-1 text-sm hover:bg-accent hover:text-accent-foreground text-muted-foreground">
+                <span class="method-badge method-get text-xs">GET</span>
+                <span>/dashboard/monthly-analytics</span>
+            </a>
+            <a href="#budget-progress" class="nav-link group flex w-full items-center rounded-md border border-transparent px-2 py-1 text-sm hover:bg-accent hover:text-accent-foreground text-muted-foreground">
+                <span class="method-badge method-get text-xs">GET</span>
+                <span>/dashboard/budget-progress</span>
             </a>
         </div>
     </div>
@@ -204,13 +305,40 @@
 
 @section('toc')
 <div class="pb-4">
-    <div class="flex items-center gap-2 mb-3">
-        <svg class="h-4 w-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
-        </svg>
-        <p class="font-semibold text-foreground">On This Page</p>
+    <div class="flex items-center justify-between mb-3">
+        <div class="flex items-center gap-2">
+            <svg class="h-4 w-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
+            </svg>
+            <p class="font-semibold text-foreground">On This Page</p>
+        </div>
+        <button id="toc-collapse" class="p-1 hover:bg-accent rounded-sm" aria-label="Collapse table of contents">
+            <svg class="h-3 w-3 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+        </button>
     </div>
-    <div id="toc-container" class="border-l border-border"></div>
+    
+    <!-- Reading Progress Bar -->
+    <div class="mb-3">
+        <div class="flex items-center gap-2 text-xs text-muted-foreground mb-1">
+            <span>Reading Progress</span>
+            <span id="progress-text">0%</span>
+        </div>
+        <div class="w-full bg-muted rounded-full h-1">
+            <div id="progress-bar" class="bg-primary h-1 rounded-full transition-all duration-300" style="width: 0%"></div>
+        </div>
+    </div>
+    
+    <div id="toc-container" class="border-l border-border" role="navigation" aria-label="Table of contents"></div>
+    
+    <!-- Back to Top Button -->
+    <button id="back-to-top" class="hidden mt-4 w-full text-xs py-2 px-3 bg-accent hover:bg-accent/80 rounded-md text-accent-foreground transition-all duration-200" aria-label="Back to top">
+        <svg class="h-3 w-3 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+        </svg>
+        Back to Top
+    </button>
 </div>
 @endsection
 
@@ -223,6 +351,31 @@
         border-radius: 0.375rem;
         font-size: 0.75rem;
         text-transform: uppercase;
+        min-width: 40px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    
+    /* Sidebar method badges - smaller and consistent width */
+    .nav-link .method-badge {
+        min-width: 32px;
+        padding: 0.125rem 0.375rem;
+        font-size: 0.625rem;
+        line-height: 1.2;
+        margin-right: 0.5rem;
+    }
+    
+    /* Ensure proper alignment in nav links */
+    .nav-link {
+        display: flex;
+        align-items: center;
+    }
+    
+    /* Ensure consistent spacing for endpoint text */
+    .nav-link span:last-child {
+        flex: 1;
     }
     .method-get { background-color: #10b981; color: white; }
     .method-post { background-color: #3b82f6; color: white; }
@@ -301,6 +454,138 @@
         <p class="text-xl text-muted-foreground">
             Complete reference for the Budget Tracker API with interactive testing capabilities.
         </p>
+    </div>
+
+    <!-- API Overview -->
+    <div class="mb-12">
+        <h2 id="getting-started" class="scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight mb-6">
+            📚 API Overview
+        </h2>
+        
+        <div class="grid lg:grid-cols-2 gap-6 mb-8">
+            <div class="rounded-lg border border-border bg-card p-6">
+                <h3 class="text-xl font-semibold mb-4">🚀 Getting Started</h3>
+                <div class="space-y-3 text-sm">
+                    <p><strong>Base URL:</strong> <code class="text-xs bg-muted px-2 py-1 rounded">{{ config('app.url') }}/api</code></p>
+                    <p><strong>Authentication:</strong> Bearer Token (Laravel Sanctum)</p>
+                    <p><strong>Content-Type:</strong> <code class="text-xs bg-muted px-2 py-1 rounded">application/json</code></p>
+                    <p><strong>Rate Limit:</strong> 60 requests per minute</p>
+                </div>
+            </div>
+            
+            <div class="rounded-lg border border-border bg-card p-6">
+                <h3 class="text-xl font-semibold mb-4">🏗️ API Structure</h3>
+                <div class="space-y-2 text-sm">
+                    <div class="flex items-center gap-2">
+                        <span class="method-badge method-get text-xs">GET</span>
+                        <span>Retrieve resources</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="method-badge method-post text-xs">POST</span>
+                        <span>Create new resources</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="method-badge method-put text-xs">PUT</span>
+                        <span>Update existing resources</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="method-badge method-delete text-xs">DEL</span>
+                        <span>Delete resources</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Error Handling -->
+        <div class="mb-8">
+            <h3 id="error-handling" class="text-2xl font-semibold mb-4">⚠️ Error Handling</h3>
+            <div class="rounded-lg border border-border bg-card p-6">
+                <p class="text-sm text-muted-foreground mb-4">All errors follow a consistent JSON structure:</p>
+                <pre class="text-xs bg-muted p-4 rounded overflow-x-auto"><code>{
+  "error": "Error Type",
+  "message": "Human readable error message",
+  "details": {
+    // Additional error context (validation errors, etc.)
+  }
+}</code></pre>
+                
+                <div class="mt-4 space-y-2">
+                    <div class="flex justify-between items-center py-2 px-3 bg-muted/50 rounded text-sm">
+                        <strong>200 OK</strong> <span class="text-muted-foreground">Successful request</span>
+                    </div>
+                    <div class="flex justify-between items-center py-2 px-3 bg-muted/50 rounded text-sm">
+                        <strong>401 Unauthorized</strong> <span class="text-muted-foreground">Authentication required</span>
+                    </div>
+                    <div class="flex justify-between items-center py-2 px-3 bg-muted/50 rounded text-sm">
+                        <strong>422 Validation Error</strong> <span class="text-muted-foreground">Invalid input data</span>
+                    </div>
+                    <div class="flex justify-between items-center py-2 px-3 bg-muted/50 rounded text-sm">
+                        <strong>429 Too Many Requests</strong> <span class="text-muted-foreground">Rate limit exceeded</span>
+                    </div>
+                    <div class="flex justify-between items-center py-2 px-3 bg-muted/50 rounded text-sm">
+                        <strong>500 Server Error</strong> <span class="text-muted-foreground">Internal server error</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rate Limiting -->
+        <div class="mb-8">
+            <h3 id="rate-limiting" class="text-2xl font-semibold mb-4">🚦 Rate Limiting</h3>
+            <div class="rounded-lg border border-border bg-card p-6">
+                <p class="text-sm text-muted-foreground mb-4">API requests are limited to prevent abuse:</p>
+                <div class="space-y-2">
+                    <div class="flex justify-between items-center py-2 px-3 bg-muted/50 rounded text-sm">
+                        <strong>Standard endpoints</strong> <span class="text-muted-foreground">60 requests/minute</span>
+                    </div>
+                    <div class="flex justify-between items-center py-2 px-3 bg-muted/50 rounded text-sm">
+                        <strong>Authentication endpoints</strong> <span class="text-muted-foreground">5 requests/minute</span>
+                    </div>
+                </div>
+                <p class="text-xs text-muted-foreground mt-3">Rate limit headers are included in all responses: <code>X-RateLimit-Limit</code>, <code>X-RateLimit-Remaining</code></p>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="mb-8">
+            <h3 id="pagination" class="text-2xl font-semibold mb-4">📄 Pagination</h3>
+            <div class="rounded-lg border border-border bg-card p-6">
+                <p class="text-sm text-muted-foreground mb-4">List endpoints support pagination with consistent parameters:</p>
+                <pre class="text-xs bg-muted p-4 rounded overflow-x-auto mb-4"><code>GET /api/transactions?page=2&per_page=15&sort=date&order=desc</code></pre>
+                
+                <div class="space-y-2 mb-4">
+                    <div class="flex justify-between items-center py-2 px-3 bg-muted/50 rounded text-sm">
+                        <strong>page</strong> <span class="text-muted-foreground">Page number (default: 1)</span>
+                    </div>
+                    <div class="flex justify-between items-center py-2 px-3 bg-muted/50 rounded text-sm">
+                        <strong>per_page</strong> <span class="text-muted-foreground">Items per page (default: 15, max: 100)</span>
+                    </div>
+                    <div class="flex justify-between items-center py-2 px-3 bg-muted/50 rounded text-sm">
+                        <strong>sort</strong> <span class="text-muted-foreground">Sort field</span>
+                    </div>
+                    <div class="flex justify-between items-center py-2 px-3 bg-muted/50 rounded text-sm">
+                        <strong>order</strong> <span class="text-muted-foreground">asc or desc</span>
+                    </div>
+                </div>
+
+                <p class="text-sm text-muted-foreground mb-3">Paginated responses include metadata:</p>
+                <pre class="text-xs bg-muted p-4 rounded overflow-x-auto"><code>{
+  "data": [...],
+  "meta": {
+    "current_page": 2,
+    "total": 150,
+    "per_page": 15,
+    "last_page": 10
+  },
+  "links": {
+    "first": "/api/transactions?page=1",
+    "last": "/api/transactions?page=10",
+    "prev": "/api/transactions?page=1",
+    "next": "/api/transactions?page=3"
+  }
+}</code></pre>
+            </div>
+        </div>
     </div>
 
     <!-- Authentication Overview -->
@@ -2296,6 +2581,468 @@
         </div>
     </div>
 
+    <!-- Dashboard Analytics Testing -->
+    <div class="mb-12">
+        <h2 id="dashboard-overview" class="scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight mb-6">
+            📈 Dashboard Analytics
+        </h2>
+
+        <div class="rounded-lg border border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950/30 text-card-foreground shadow-sm mb-6">
+            <div class="p-6">
+                <div class="flex items-start space-x-3">
+                    <div class="flex-shrink-0">
+                        <svg class="h-6 w-6 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-blue-900 dark:text-blue-100 mb-2">Dashboard Analytics Overview</h3>
+                        <p class="text-sm text-blue-800 dark:text-blue-200">
+                            Comprehensive dashboard analytics endpoints designed for frontend integration. These endpoints provide real-time financial statistics, transaction insights, and budget progress tracking with optimized data structures.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Statistics -->
+        <div id="dashboard-stats" class="mb-8">
+            <h3 class="text-2xl font-semibold mb-4">Dashboard Statistics</h3>
+            
+            <div class="rounded-lg border border-border bg-card text-card-foreground shadow-sm endpoint-card">
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-3">
+                            <span class="method-badge method-get">GET</span>
+                            <code class="text-lg font-mono">/api/dashboard/stats</code>
+                        </div>
+                        <span class="text-sm text-muted-foreground">Authentication: Bearer Token</span>
+                    </div>
+                    
+                    <p class="text-muted-foreground mb-6">
+                        Returns comprehensive financial statistics including total balance, income, expenses, and category spending breakdown. 
+                        Optimized for dashboard widgets and overview displays.
+                    </p>
+                    
+                    <div class="grid lg:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="text-lg font-semibold mb-3">Query Parameters</h4>
+                            <div class="space-y-2 mb-4">
+                                <div class="flex justify-between items-center py-2 px-3 bg-muted/50 rounded">
+                                    <code class="text-sm">period</code>
+                                    <span class="text-xs text-muted-foreground">current_month (default), current_week, current_quarter, current_year, last_30_days, last_90_days</span>
+                                </div>
+                            </div>
+                            
+                            <div class="rounded-lg border border-border bg-muted/30 p-4">
+                                <h5 class="font-medium mb-3">Test this endpoint</h5>
+                                <form onsubmit="testEndpoint(event, 'dashboard-stats')" class="space-y-3">
+                                    <select name="period" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+                                        <option value="current_month">Current Month</option>
+                                        <option value="current_week">Current Week</option>
+                                        <option value="current_quarter">Current Quarter</option>
+                                        <option value="current_year">Current Year</option>
+                                        <option value="last_30_days">Last 30 Days</option>
+                                        <option value="last_90_days">Last 90 Days</option>
+                                    </select>
+                                    <button type="submit" class="w-full inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
+                                        Get Dashboard Stats
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h4 class="text-lg font-semibold mb-3">Example Response</h4>
+                            <pre class="text-xs"><code>{
+  "total_balance": 5420.50,
+  "total_income": 8000.00,
+  "total_expenses": 2579.50,
+  "category_spending": [
+    {
+      "name": "Food & Dining",
+      "value": 450.75,
+      "color": "#ef4444"
+    },
+    {
+      "name": "Transportation", 
+      "value": 320.25,
+      "color": "#3b82f6"
+    },
+    {
+      "name": "Entertainment",
+      "value": 180.50,
+      "color": "#8b5cf6"
+    }
+  ]
+}</code></pre>
+                        </div>
+                    </div>
+                    
+                    <div id="response-dashboard-stats" class="mt-6 hidden">
+                        <h4 class="text-lg font-semibold mb-3">Response</h4>
+                        <div class="response-container rounded border bg-muted p-4">
+                            <pre id="response-content-dashboard-stats" class="text-sm"></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Transactions -->
+        <div id="recent-transactions" class="mb-8">
+            <h3 class="text-2xl font-semibold mb-4">Recent Transactions</h3>
+            
+            <div class="rounded-lg border border-border bg-card text-card-foreground shadow-sm endpoint-card">
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-3">
+                            <span class="method-badge method-get">GET</span>
+                            <code class="text-lg font-mono">/api/dashboard/recent-transactions</code>
+                        </div>
+                        <span class="text-sm text-muted-foreground">Authentication: Bearer Token</span>
+                    </div>
+                    
+                    <p class="text-muted-foreground mb-6">
+                        Returns recent transactions with category and account details. Perfect for dashboard activity feeds and transaction widgets.
+                    </p>
+                    
+                    <div class="grid lg:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="text-lg font-semibold mb-3">Query Parameters</h4>
+                            <div class="space-y-2 mb-4">
+                                <div class="flex justify-between items-center py-2 px-3 bg-muted/50 rounded">
+                                    <code class="text-sm">limit</code>
+                                    <span class="text-xs text-muted-foreground">integer (1-50), default: 5</span>
+                                </div>
+                            </div>
+                            
+                            <div class="rounded-lg border border-border bg-muted/30 p-4">
+                                <h5 class="font-medium mb-3">Test this endpoint</h5>
+                                <form onsubmit="testEndpoint(event, 'recent-transactions')" class="space-y-3">
+                                    <input name="limit" type="number" min="1" max="50" placeholder="Limit (default: 5)" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+                                    <button type="submit" class="w-full inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
+                                        Get Recent Transactions
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h4 class="text-lg font-semibold mb-3">Example Response</h4>
+                            <pre class="text-xs"><code>[
+  {
+    "id": 1,
+    "amount": "150.75",
+    "type": "expense",
+    "description": "Grocery shopping",
+    "date": "2025-11-26",
+    "created_at": "2025-11-26T10:30:00.000Z",
+    "category": {
+      "id": 1,
+      "name": "Food & Dining",
+      "color": "#ef4444",
+      "type": "expense"
+    },
+    "account": {
+      "id": 1,
+      "name": "Main Checking"
+    }
+  },
+  {
+    "id": 2,
+    "amount": "2500.00", 
+    "type": "income",
+    "description": "Monthly salary",
+    "date": "2025-11-25",
+    "created_at": "2025-11-25T09:00:00.000Z",
+    "category": {
+      "id": 2,
+      "name": "Salary",
+      "color": "#10b981",
+      "type": "income"
+    },
+    "account": {
+      "id": 1,
+      "name": "Main Checking"
+    }
+  }
+]</code></pre>
+                        </div>
+                    </div>
+                    
+                    <div id="response-recent-transactions" class="mt-6 hidden">
+                        <h4 class="text-lg font-semibold mb-3">Response</h4>
+                        <div class="response-container rounded border bg-muted p-4">
+                            <pre id="response-content-recent-transactions" class="text-sm"></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Monthly Analytics -->
+        <div id="monthly-analytics" class="mb-8">
+            <h3 class="text-2xl font-semibold mb-4">Monthly Analytics</h3>
+            
+            <div class="rounded-lg border border-border bg-card text-card-foreground shadow-sm endpoint-card">
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-3">
+                            <span class="method-badge method-get">GET</span>
+                            <code class="text-lg font-mono">/api/dashboard/monthly-analytics</code>
+                        </div>
+                        <span class="text-sm text-muted-foreground">Authentication: Bearer Token</span>
+                    </div>
+                    
+                    <p class="text-muted-foreground mb-6">
+                        Returns monthly breakdown of income vs expenses over a specified period. Features smart auto-detection to show data from your actual transaction dates. Ideal for trend charts and financial progress visualization.
+                    </p>
+                    
+                    <div class="grid lg:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="text-lg font-semibold mb-3">Query Parameters</h4>
+                            <div class="space-y-2 mb-4">
+                                <div class="flex justify-between items-center py-2 px-3 bg-muted/50 rounded">
+                                    <code class="text-sm">months</code>
+                                    <span class="text-xs text-muted-foreground">integer (3-12), default: 6</span>
+                                </div>
+                                <div class="flex justify-between items-center py-2 px-3 bg-muted/50 rounded">
+                                    <code class="text-sm">start_date</code>
+                                    <span class="text-xs text-muted-foreground">date (YYYY-MM-DD), optional</span>
+                                </div>
+                                <div class="flex justify-between items-center py-2 px-3 bg-muted/50 rounded">
+                                    <code class="text-sm">auto_detect</code>
+                                    <span class="text-xs text-muted-foreground">boolean, default: true</span>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                                <h6 class="text-sm font-medium text-blue-800 mb-2">💡 Smart Auto-Detection</h6>
+                                <p class="text-xs text-blue-700">
+                                    When <code>auto_detect=true</code> (default), the system automatically finds the optimal date range based on your actual transaction dates, ensuring meaningful results.
+                                </p>
+                            </div>
+                            
+                            <div class="rounded-lg border border-border bg-muted/30 p-4">
+                                <h5 class="font-medium mb-3">Test this endpoint</h5>
+                                <form onsubmit="testEndpoint(event, 'monthly-analytics')" class="space-y-3">
+                                    <select name="months" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+                                        <option value="3">Last 3 Months</option>
+                                        <option value="6" selected>Last 6 Months</option>
+                                        <option value="9">Last 9 Months</option>
+                                        <option value="12">Last 12 Months</option>
+                                    </select>
+                                    <input name="start_date" type="date" placeholder="Start Date (optional)" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+                                    <div class="flex items-center space-x-2">
+                                        <input name="auto_detect" type="checkbox" checked class="rounded border-gray-300 text-primary focus:ring-primary">
+                                        <label class="text-sm text-muted-foreground">Auto-detect optimal date range</label>
+                                    </div>
+                                    <button type="submit" class="w-full inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
+                                        Get Monthly Analytics
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h4 class="text-lg font-semibold mb-3">Example Response</h4>
+                            <pre class="text-xs"><code>{
+  "period": "6 months",
+  "date_range": {
+    "start": "2025-06-01",
+    "end": "2025-11-30"
+  },
+  "auto_detected": true,
+  "data": [
+    {
+      "month": "Jun 2025",
+      "month_short": "Jun",
+      "income": 3200.00,
+      "expenses": 1850.25,
+      "net": 1349.75
+    },
+    {
+      "month": "Jul 2025", 
+      "month_short": "Jul",
+      "income": 3200.00,
+      "expenses": 2100.50,
+      "net": 1099.50
+    },
+    {
+      "month": "Aug 2025",
+      "month_short": "Aug", 
+      "income": 3200.00,
+      "expenses": 1975.80,
+      "net": 1224.20
+    },
+    {
+      "month": "Sep 2025",
+      "month_short": "Sep",
+      "income": 3200.00,
+      "expenses": 2250.30,
+      "net": 949.70
+    },
+    {
+      "month": "Oct 2025",
+      "month_short": "Oct",
+      "income": 3200.00,
+      "expenses": 2050.45,
+      "net": 1149.55
+    },
+    {
+      "month": "Nov 2025",
+      "month_short": "Nov",
+      "income": 1600.00,
+      "expenses": 1200.75,
+      "net": 399.25
+    }
+  ]
+}</code></pre>
+                        </div>
+                    </div>
+                    
+                    <div id="response-monthly-analytics" class="mt-6 hidden">
+                        <h4 class="text-lg font-semibold mb-3">Response</h4>
+                        <div class="response-container rounded border bg-muted p-4">
+                            <pre id="response-content-monthly-analytics" class="text-sm"></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Budget Progress -->
+        <div id="budget-progress" class="mb-8">
+            <h3 class="text-2xl font-semibold mb-4">Budget Progress</h3>
+            
+            <div class="rounded-lg border border-border bg-card text-card-foreground shadow-sm endpoint-card">
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-3">
+                            <span class="method-badge method-get">GET</span>
+                            <code class="text-lg font-mono">/api/dashboard/budget-progress</code>
+                        </div>
+                        <span class="text-sm text-muted-foreground">Authentication: Bearer Token</span>
+                    </div>
+                    
+                    <p class="text-muted-foreground mb-6">
+                        Returns current budget progress with spending analysis. Shows active budgets, exceeded budgets, and remaining amounts for progress tracking widgets.
+                    </p>
+                    
+                    <div class="grid lg:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="text-lg font-semibold mb-3">Test this endpoint</h4>
+                            <div class="rounded-lg border border-border bg-muted/30 p-4">
+                                <h5 class="font-medium mb-3">Get current budget progress</h5>
+                                <form onsubmit="testEndpoint(event, 'budget-progress')" class="space-y-3">
+                                    <button type="submit" class="w-full inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
+                                        Get Budget Progress
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h4 class="text-lg font-semibold mb-3">Example Response</h4>
+                            <pre class="text-xs"><code>{
+  "active_budgets": [
+    {
+      "id": 1,
+      "name": "Monthly Food Budget",
+      "category": "Food & Dining",
+      "color": "#ef4444",
+      "amount": 600.00,
+      "spent": 425.75,
+      "remaining": 174.25,
+      "percentage": 70.9,
+      "is_exceeded": false,
+      "is_limiter": false,
+      "days_remaining": 5
+    },
+    {
+      "id": 2,
+      "name": "Transportation Budget",
+      "category": "Transportation",
+      "color": "#3b82f6", 
+      "amount": 300.00,
+      "spent": 320.50,
+      "remaining": -20.50,
+      "percentage": 100,
+      "is_exceeded": true,
+      "is_limiter": true,
+      "days_remaining": 5
+    }
+  ],
+  "total_budgets": 2,
+  "exceeded_count": 1
+}</code></pre>
+                        </div>
+                    </div>
+                    
+                    <div id="response-budget-progress" class="mt-6 hidden">
+                        <h4 class="text-lg font-semibold mb-3">Response</h4>
+                        <div class="response-container rounded border bg-muted p-4">
+                            <pre id="response-content-budget-progress" class="text-sm"></pre>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 p-4 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded">
+                        <div class="flex items-start space-x-3">
+                            <div class="flex-shrink-0">
+                                <svg class="h-5 w-5 text-amber-600 dark:text-amber-400" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-amber-900 dark:text-amber-100">
+                                    Budget Progress Notes
+                                </p>
+                                <p class="text-sm text-amber-700 dark:text-amber-300 mt-1">
+                                    • <strong>is_limiter</strong>: When true, prevents transactions that would exceed the budget<br>
+                                    • <strong>percentage</strong>: Capped at 100% for display purposes<br>
+                                    • <strong>days_remaining</strong>: Can be negative if budget period has ended<br>
+                                    • Only active budgets (current date within budget period) are returned
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Integration Guidelines -->
+        <div class="mb-8">
+            <div class="rounded-lg border border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950/30 text-card-foreground shadow-sm">
+                <div class="p-6">
+                    <h4 class="text-lg font-semibold text-green-900 dark:text-green-100 mb-4">💡 Frontend Integration Tips</h4>
+                    <div class="space-y-3 text-sm text-green-800 dark:text-green-200">
+                        <div class="flex items-start space-x-2">
+                            <span class="font-semibold min-w-0 flex-shrink-0">Performance:</span>
+                            <span>Dashboard stats and recent transactions can be loaded simultaneously for faster page loads</span>
+                        </div>
+                        <div class="flex items-start space-x-2">
+                            <span class="font-semibold min-w-0 flex-shrink-0">Caching:</span>
+                            <span>Consider caching dashboard stats for 5-10 minutes to reduce API calls</span>
+                        </div>
+                        <div class="flex items-start space-x-2">
+                            <span class="font-semibold min-w-0 flex-shrink-0">Error Handling:</span>
+                            <span>All endpoints return consistent JSON structures - check for "success" field or status codes</span>
+                        </div>
+                        <div class="flex items-start space-x-2">
+                            <span class="font-semibold min-w-0 flex-shrink-0">Chart Data:</span>
+                            <span>Monthly analytics data is optimized for Chart.js and similar libraries</span>
+                        </div>
+                        <div class="flex items-start space-x-2">
+                            <span class="font-semibold min-w-0 flex-shrink-0">Real-time Updates:</span>
+                            <span>Refresh dashboard data after creating transactions or updating budgets</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Testing Guide -->
     <div class="mb-12">
         <h2 id="testing-guide" class="scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight mb-6">
@@ -2728,7 +3475,11 @@ curl -X PUT {{ url('/api/profile') }} \
             'budgets-list': { url: '/api/budgets', method: 'GET' },
             'budgets-create': { url: '/api/budgets', method: 'POST' },
             'budgets-update': { url: '/api/budgets/{id}', method: 'PUT' },
-            'budgets-delete': { url: '/api/budgets/{id}', method: 'DELETE' }
+            'budgets-delete': { url: '/api/budgets/{id}', method: 'DELETE' },
+            'dashboard-stats': { url: '/api/dashboard/stats', method: 'GET' },
+            'recent-transactions': { url: '/api/dashboard/recent-transactions', method: 'GET' },
+            'monthly-analytics': { url: '/api/dashboard/monthly-analytics', method: 'GET' },
+            'budget-progress': { url: '/api/dashboard/budget-progress', method: 'GET' }
         };
         
         const config = endpoints[endpoint];
@@ -2761,6 +3512,19 @@ curl -X PUT {{ url('/api/profile') }} \
             headers['Authorization'] = 'Bearer ' + globalToken;
         }
         
+        // Handle query parameters for GET requests
+        if (config.method === 'GET' && Object.keys(data).length > 0) {
+            const params = new URLSearchParams();
+            Object.keys(data).forEach(key => {
+                if (data[key] !== '' && data[key] !== null && data[key] !== undefined) {
+                    params.append(key, data[key]);
+                }
+            });
+            if (params.toString()) {
+                url += (url.includes('?') ? '&' : '?') + params.toString();
+            }
+        }
+        
         try {
             const response = await fetch(url, {
                 method: config.method,
@@ -2788,30 +3552,44 @@ curl -X PUT {{ url('/api/profile') }} \
         }
     }
 
-    // Auto-generate table of contents
+    // Enhanced table of contents with best practices
     document.addEventListener('DOMContentLoaded', () => {
         const tocContainer = document.getElementById('toc-container');
+        const progressBar = document.getElementById('progress-bar');
+        const progressText = document.getElementById('progress-text');
+        const backToTopBtn = document.getElementById('back-to-top');
+        const collapseBtn = document.getElementById('toc-collapse');
+        
         if (!tocContainer) return;
 
         const headings = document.querySelectorAll('h2[id], h3[id], h4[id]');
         if (headings.length === 0) {
-            tocContainer.innerHTML = '<p class="text-sm text-muted-foreground px-4">No headings found</p>';
+            tocContainer.innerHTML = '<p class="text-sm text-muted-foreground px-4" role="status">No headings found</p>';
             return;
         }
 
         const tocList = document.createElement('ul');
-        tocList.className = 'space-y-1';
+        tocList.className = 'space-y-1 transition-all duration-300';
+        tocList.setAttribute('role', 'list');
+
+        let isCollapsed = false;
 
         headings.forEach((heading, index) => {
             const li = document.createElement('li');
+            li.setAttribute('role', 'listitem');
+            
             const link = document.createElement('a');
             link.href = '#' + heading.id;
             link.textContent = heading.textContent;
-            link.className = `toc-link text-muted-foreground hover:text-foreground cursor-pointer ${
-                heading.tagName === 'H2' ? '' : 
+            link.className = `toc-link text-muted-foreground hover:text-foreground cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-sm ${
+                heading.tagName === 'H2' ? 'font-medium' : 
                 heading.tagName === 'H3' ? 'pl-4 text-xs' : 
-                'pl-8 text-xs'
+                'pl-8 text-xs opacity-75'
             }`;
+            
+            // Accessibility attributes
+            link.setAttribute('aria-label', `Go to section: ${heading.textContent}`);
+            link.setAttribute('tabindex', '0');
             
             // Add click handler for smooth scrolling
             link.addEventListener('click', (e) => {
@@ -2829,6 +3607,17 @@ curl -X PUT {{ url('/api/profile') }} \
                     // Update active link
                     document.querySelectorAll('.toc-link').forEach(a => a.classList.remove('active'));
                     link.classList.add('active');
+                    
+                    // Announce to screen readers
+                    link.setAttribute('aria-current', 'true');
+                }
+            });
+
+            // Keyboard navigation
+            link.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    link.click();
                 }
             });
 
@@ -2837,6 +3626,58 @@ curl -X PUT {{ url('/api/profile') }} \
         });
 
         tocContainer.appendChild(tocList);
+
+        // Collapse/Expand functionality
+        collapseBtn?.addEventListener('click', () => {
+            isCollapsed = !isCollapsed;
+            const icon = collapseBtn.querySelector('svg');
+            
+            if (isCollapsed) {
+                tocList.style.maxHeight = '0';
+                tocList.style.overflow = 'hidden';
+                icon.style.transform = 'rotate(-90deg)';
+                collapseBtn.setAttribute('aria-label', 'Expand table of contents');
+                tocContainer.setAttribute('aria-expanded', 'false');
+            } else {
+                tocList.style.maxHeight = 'none';
+                tocList.style.overflow = 'visible';
+                icon.style.transform = 'rotate(0deg)';
+                collapseBtn.setAttribute('aria-label', 'Collapse table of contents');
+                tocContainer.setAttribute('aria-expanded', 'true');
+            }
+        });
+
+        // Reading progress tracking
+        const updateProgress = () => {
+            const documentHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const scrolled = window.scrollY;
+            const progress = Math.min(Math.round((scrolled / documentHeight) * 100), 100);
+            
+            if (progressBar && progressText) {
+                progressBar.style.width = progress + '%';
+                progressText.textContent = progress + '%';
+            }
+            
+            // Show/hide back to top button
+            if (backToTopBtn) {
+                if (scrolled > 300) {
+                    backToTopBtn.classList.remove('hidden');
+                } else {
+                    backToTopBtn.classList.add('hidden');
+                }
+            }
+        };
+
+        // Back to top functionality
+        backToTopBtn?.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+
+        window.addEventListener('scroll', updateProgress);
+        updateProgress(); // Initial call
 
         // Add scroll spy functionality
         let observer = new IntersectionObserver((entries) => {
@@ -2880,6 +3721,11 @@ curl -X PUT {{ url('/api/profile') }} \
             'category-management': 'category',
             'transaction-management': 'transaction',
             'budget-management': 'budget',
+            'dashboard-overview': 'dashboard',
+            'dashboard-stats': 'dashboard',
+            'recent-transactions': 'dashboard',
+            'monthly-analytics': 'dashboard',
+            'budget-progress': 'dashboard',
             'testing-guide': 'testing',
             'examples': 'testing'
         };
@@ -2919,6 +3765,7 @@ curl -X PUT {{ url('/api/profile') }} \
                             (activeSection === 'category' && buttonText.includes('category management')) ||
                             (activeSection === 'transaction' && buttonText.includes('transaction management')) ||
                             (activeSection === 'budget' && buttonText.includes('budget management')) ||
+                            (activeSection === 'dashboard' && buttonText.includes('dashboard analytics')) ||
                             (activeSection === 'testing' && buttonText.includes('interactive testing'))) {
                             
                             button.classList.add('section-button-active');

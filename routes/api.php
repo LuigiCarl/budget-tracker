@@ -45,6 +45,10 @@ Route::middleware('auth:sanctum')->group(function () {
     
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index']);
+    Route::get('/dashboard/stats', [DashboardController::class, 'getStats']);
+    Route::get('/dashboard/recent-transactions', [DashboardController::class, 'getRecentTransactions']);
+    Route::get('/dashboard/monthly-analytics', [DashboardController::class, 'getMonthlyAnalytics']);
+    Route::get('/dashboard/budget-progress', [DashboardController::class, 'getBudgetProgress']);
     
     // Analytics API
     Route::prefix('analytics')->group(function () {
