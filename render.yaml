@@ -4,8 +4,8 @@ services:
   env: docker
   dockerfilePath: ./Dockerfile
   plan: starter
-    healthCheckPath: /up
-    envVars:
+  healthCheckPath: /up
+  envVars:
       # Application Settings
       - key: APP_NAME
         value: Budget Tracker
