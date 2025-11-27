@@ -44,10 +44,14 @@ RUN composer dump-autoload --no-dev --optimize
 RUN npm run build
 
 # Set permissions
-RUN chmod -R 755 storage bootstrap/cache
+RUN chmod -R 775 storage bootstrap/cache
 
 # Expose port
 EXPOSE $PORT
 
-# Start command
-CMD php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=$PORT
+# Start command - Generate key if missing, clear config cache, run migrations, then serve
+CMD if [ -z "$APP_KEY" ]; then php artisan key:generate --force; fi && \
+    php artisan config:clear && \
+    php artisan cache:clear && \
+    php artisan migrate --force && \
+    php artisan serve --host=0.0.0.0 --port=$PORT
