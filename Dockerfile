@@ -1,5 +1,4 @@
-# Use official PHP image with Apache
-FROM php:8.2-apache
+FROM php:8.2-cli
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
@@ -8,57 +7,47 @@ RUN apt-get update && apt-get install -y \
     libpng-dev \
     libonig-dev \
     libxml2-dev \
-    libzip-dev \
     zip \
-    unzip \
-    nodejs \
-    npm
+    unzip
+
+# Install Node.js
+RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
+    && apt-get install -y nodejs
 
 # Clear cache
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install PHP extensions
-RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
+RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
 
 # Get latest Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Set working directory
-WORKDIR /var/www/html
+WORKDIR /app
 
-# Copy existing application directory contents
-COPY . /var/www/html
+# Copy composer files first for better caching
+COPY composer.json composer.lock ./
+RUN composer install --no-scripts --no-autoloader --no-dev
 
-# Install PHP dependencies
-RUN composer install --no-dev --optimize-autoloader --no-interaction
+# Copy package.json files
+COPY package.json package-lock.json* ./
+RUN npm ci
 
-# Install Node dependencies and build assets
-RUN npm ci && npm run build
+# Copy application code
+COPY . .
 
-# Change ownership of our applications
-RUN chown -R www-data:www-data /var/www/html \
-    && chmod -R 755 /var/www/html/storage \
-    && chmod -R 755 /var/www/html/bootstrap/cache
+# Complete composer installation
+RUN composer dump-autoload --no-dev --optimize
 
-# Enable Apache mod_rewrite
-RUN a2enmod rewrite
+# Build assets
+RUN npm run build
 
-# Configure Apache DocumentRoot
-ENV APACHE_DOCUMENT_ROOT /var/www/html/public
+# Set permissions
+RUN chmod -R 755 storage bootstrap/cache
 
-RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
-RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
+# Expose port
+EXPOSE $PORT
 
-# Create Apache configuration for Laravel
-RUN echo '<Directory /var/www/html/public>\n\
-    AllowOverride All\n\
-    Require all granted\n\
-</Directory>' > /etc/apache2/conf-available/laravel.conf
-
-RUN a2enconf laravel
-
-# Expose port 80
-EXPOSE 80
-
-# Start Apache in foreground
-CMD ["apache2-foreground"]
+# Start command
+CMD php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=$PORT
