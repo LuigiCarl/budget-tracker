@@ -4,27 +4,33 @@ This directory contains SQL dump files for the Budget Tracker database.
 
 ## Files
 
-### `budget_tracker_schema.sql`
-Contains the database schema (structure only) without any data. Use this file to:
-- Set up a fresh database with the correct table structure
+### `budget_tracker_schema.sql` (MySQL/MariaDB)
+Contains the MySQL database schema (structure only) without any data. Use this file to:
+- Set up a fresh MySQL/MariaDB database
 - Review the database design
-- Initialize a new environment
+- Initialize a new MySQL environment
 
 **Import command:**
 ```bash
-# MySQL
 mysql -u your_username -p your_database_name < database/budget_tracker_schema.sql
-
-# PostgreSQL (if migrating)
-# You'll need to convert the schema or use Laravel migrations instead
-php artisan migrate
 ```
 
-### `budget_tracker_full.sql`
-Contains the complete database dump including all data. Use this file to:
+### `budget_tracker_postgresql.sql` (PostgreSQL)
+Contains the PostgreSQL-compatible database schema. Use this file to:
+- Set up a fresh PostgreSQL database
+- Deploy to PostgreSQL-based platforms (like Render)
+- Review PostgreSQL-specific schema
+
+**Import command:**
+```bash
+psql -U your_username -d your_database_name -f database/budget_tracker_postgresql.sql
+```
+
+### `budget_tracker_full.sql` (MySQL/MariaDB with data)
+Contains the complete MySQL database dump including all data. Use this file to:
 - Clone the entire database with sample data
 - Backup/restore the database
-- Migrate to another server with existing data
+- Migrate to another MySQL server with existing data
 
 **Import command:**
 ```bash

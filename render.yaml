@@ -22,29 +22,22 @@ services:
       - key: ASSET_URL
         value: https://budget-tracker-gcjt.onrender.com
       
-      # Database Configuration (links to postgres service below)
+      # Database Configuration - Supabase PostgreSQL
+      # Get these values from Supabase: Settings > Database > Connection Info
       - key: DB_CONNECTION
         value: pgsql
       - key: DB_HOST
-        fromDatabase:
-          name: budget-tracker-db
-          property: host
+        sync: false # Set to your Supabase host (e.g., db.xxxxx.supabase.co)
       - key: DB_PORT
-        fromDatabase:
-          name: budget-tracker-db
-          property: port
+        value: 5432
       - key: DB_DATABASE
-        fromDatabase:
-          name: budget-tracker-db
-          property: database
+        sync: false # Set to your Supabase database name (usually 'postgres')
       - key: DB_USERNAME
-        fromDatabase:
-          name: budget-tracker-db
-          property: user
+        sync: false # Set to 'postgres' or your Supabase username
       - key: DB_PASSWORD
-        fromDatabase:
-          name: budget-tracker-db
-          property: password
+        sync: false # Set to your Supabase database password
+      - key: DB_SSLMODE
+        value: require # Required for Supabase connections
       
       # Session & Cache Configuration
       - key: SESSION_DRIVER
@@ -78,14 +71,15 @@ services:
       - key: MAIL_FROM_NAME
         value: Budget Tracker
 
-# Database Service (PostgreSQL)
-databases:
-  - name: budget-tracker-db
-    databaseName: budget_tracker
-    user: budget_user
-    plan: starter # Change to 'standard' for production
+# Note: Database service below is commented out since using Supabase
+# If you want to use Render's PostgreSQL instead, uncomment the section below
+# and update the DB_ environment variables above to use fromDatabase
 
-# Optional: Redis for sessions/cache (uncomment if needed for production)
+# databases:
+#   - name: budget-tracker-db
+#     databaseName: budget_tracker
+#     user: budget_user
+#     plan: starter
 # - type: redis
 #   name: budget-tracker-redis
 #   plan: starter
