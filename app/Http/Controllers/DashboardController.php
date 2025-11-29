@@ -93,6 +93,7 @@ class DashboardController extends Controller
                 return [
                     'name' => $category->name,
                     'value' => (float) $category->value,
+                    'color' => $category->color,
                     'budget_limit' => (float) $category->budget_limit,
                     'percentage_used' => round($percentage, 1)
                 ];

@@ -28,6 +28,7 @@
                     <option value="current_year">Current Year</option>
                     <option value="last_30_days">Last 30 Days</option>
                     <option value="last_90_days">Last 90 Days</option>
+                    <option value="all_time">All Time</option>
                 </select>
             </div>
         </div>
@@ -368,7 +369,21 @@ function dashboardAnalytics() {
                 if (response.ok) {
                     const data = await response.json();
                     console.log('Dashboard stats data:', data);
-                    this.dashboardStats = data;
+                    
+                    // Map backend response to frontend structure
+                    this.dashboardStats = {
+                        total_balance: data.total_balance || 0,
+                        total_income: data.income || 0,
+                        total_expenses: data.expenses || 0,
+                        category_spending: (data.category_spending || []).map((cat, index) => ({
+                            name: cat.name,
+                            value: parseFloat(cat.value),
+                            color: cat.color || this.getCategoryColor(index),
+                            budget_limit: cat.budget_limit,
+                            percentage_used: cat.percentage_used
+                        }))
+                    };
+                    
                     this.$nextTick(() => this.initCategoryChart());
                 } else {
                     const errorText = await response.text();
@@ -395,7 +410,22 @@ function dashboardAnalytics() {
                 if (response.ok) {
                     const data = await response.json();
                     console.log('Recent transactions data:', data);
-                    this.recentTransactions = data;
+                    
+                    // Map backend response to frontend structure
+                    this.recentTransactions = (data.transactions || []).map(t => ({
+                        id: t.id,
+                        type: t.type,
+                        amount: parseFloat(t.amount),
+                        description: t.name,
+                        date: t.date,
+                        category: {
+                            name: t.category,
+                            color: '#3B82F6'
+                        },
+                        account: {
+                            name: t.account
+                        }
+                    }));
                 } else {
                     const errorText = await response.text();
                     console.error('Recent transactions error response:', errorText);
@@ -408,7 +438,7 @@ function dashboardAnalytics() {
         async loadMonthlyAnalytics() {
             try {
                 console.log('Loading monthly analytics...');
-                const response = await fetch('/api/web/dashboard/monthly-analytics', {
+                const response = await fetch('/api/web/dashboard/monthly-analytics?months=6&auto_detect=true', {
                     headers: {
                         'Accept': 'application/json',
                         'X-Requested-With': 'XMLHttpRequest',
@@ -421,7 +451,14 @@ function dashboardAnalytics() {
                 if (response.ok) {
                     const data = await response.json();
                     console.log('Monthly analytics data:', data);
-                    this.monthlyData = data;
+                    
+                    // Map backend response to frontend structure
+                    this.monthlyData = (data.data || []).map(m => ({
+                        month_name: m.month_short || m.month,
+                        total_income: parseFloat(m.income || 0),
+                        total_expenses: parseFloat(m.expenses || 0)
+                    }));
+                    
                     this.$nextTick(() => this.initTrendChart());
                 } else {
                     const errorText = await response.text();
@@ -448,7 +485,20 @@ function dashboardAnalytics() {
                 if (response.ok) {
                     const data = await response.json();
                     console.log('Budget progress data:', data);
-                    this.budgetProgress = data;
+                    
+                    // Map backend response to frontend structure
+                    this.budgetProgress = (data.active_budgets || []).map(b => ({
+                        id: b.id,
+                        amount: parseFloat(b.amount),
+                        spent_amount: parseFloat(b.spent),
+                        remaining_amount: parseFloat(b.remaining),
+                        percentage_used: parseFloat(b.percentage),
+                        is_exceeded: b.is_exceeded,
+                        category: {
+                            name: b.category,
+                            color: b.color || '#3B82F6'
+                        }
+                    }));
                 } else {
                     const errorText = await response.text();
                     console.error('Budget progress error response:', errorText);
@@ -456,6 +506,14 @@ function dashboardAnalytics() {
             } catch (error) {
                 console.error('Error loading budget progress:', error);
             }
+        },
+
+        getCategoryColor(index) {
+            const colors = [
+                '#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6',
+                '#EC4899', '#14B8A6', '#F97316', '#06B6D4', '#84CC16'
+            ];
+            return colors[index % colors.length];
         },
 
         initCategoryChart() {
@@ -585,7 +643,8 @@ function dashboardAnalytics() {
                 'current_quarter': 'This Quarter',
                 'current_year': 'This Year',
                 'last_30_days': 'Last 30 Days',
-                'last_90_days': 'Last 90 Days'
+                'last_90_days': 'Last 90 Days',
+                'all_time': 'All Time'
             };
             return periodNames[this.selectedPeriod] || 'Current Period';
         },
