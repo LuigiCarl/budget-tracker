@@ -1,7 +1,6 @@
 # Render Environment Variables for Supabase
 
-Copy these values to Render Dashboard → Your Service → Environment:
-
+## Option 1: Direct Connection (try this first)
 ```
 DB_CONNECTION=pgsql
 DB_HOST=db.wlcuedmyoilkzqytskyi.supabase.co
@@ -11,6 +10,25 @@ DB_USERNAME=postgres
 DB_PASSWORD=carlDB@2025DB
 DB_SSLMODE=require
 ```
+
+## Option 2: Connection Pooler (if Option 1 has network issues)
+If you get "Network is unreachable" error, try using Supabase's connection pooler:
+
+Go to Supabase → Settings → Database → Connection Pooling
+Look for the "Connection pooling" host, it should be like:
+```
+DB_CONNECTION=pgsql
+DB_HOST=aws-0-ap-southeast-1.pooler.supabase.com
+DB_PORT=6543
+DB_DATABASE=postgres
+DB_USERNAME=postgres.wlcuedmyoilkzqytskyi
+DB_PASSWORD=carlDB@2025DB
+DB_SSLMODE=require
+```
+
+Note: 
+- Port changes from 5432 to 6543
+- Username might include project ID (check Supabase dashboard)
 
 ## Steps to Apply:
 
