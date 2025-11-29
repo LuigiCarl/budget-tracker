@@ -29,9 +29,9 @@ php artisan config:clear --no-interaction || true
 php artisan view:clear --no-interaction || true
 php artisan route:clear --no-interaction || true
 
-# Run migrations (skip if tables already exist)
-echo "Running migrations..."
-php artisan migrate --force --no-interaction || echo "Migrations skipped (tables may already exist)"
+# Skip migrations - tables already exist in Supabase
+echo "Skipping migrations (using existing Supabase tables)..."
+# php artisan migrate --force --no-interaction || echo "Migrations skipped (tables may already exist)"
 
 # Cache config for better performance
 echo "Caching configuration..."
