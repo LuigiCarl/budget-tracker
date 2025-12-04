@@ -121,48 +121,57 @@ class DashboardController extends Controller
         $totalExpenses = $expenseQuery->sum('amount');
         
         // Calculate category spending with date range
-        $categoryQuery = \App\Models\Category::where('categories.user_id', $userId)
-            ->where('categories.type', 'expense')
-            ->select('categories.id', 'categories.name', 'categories.color')
-            ->selectRaw('COALESCE(SUM(transactions.amount), 0) as value')
-            ->selectRaw('COALESCE(budgets.amount, 0) as budget_limit')
-            ->leftJoin('transactions', function($join) use ($dateRange, $userId) {
-                $join->on('categories.id', '=', 'transactions.category_id')
-                     ->where('transactions.type', '=', 'expense')
-                     ->where('transactions.user_id', '=', $userId);
-                
-                // Apply date filter
-                if ($dateRange !== null) {
-                    $join->whereBetween('transactions.date', $dateRange);
-                }
-            })
-            ->leftJoin('budgets', function($join) use ($userId) {
-                $join->on('categories.id', '=', 'budgets.category_id')
-                     ->where('budgets.user_id', '=', $userId)
-                     ->whereDate('budgets.start_date', '<=', now())
-                     ->whereDate('budgets.end_date', '>=', now());
-            })
-            ->groupBy('categories.id', 'categories.name', 'categories.color', 'budgets.amount')
-            ->having('value', '>', 0)
-            ->orderBy('value', 'desc');
+        // PostgreSQL-compatible query: simpler approach without complex joins
+        $categories = \App\Models\Category::where('user_id', $userId)
+            ->where('type', 'expense')
+            ->get();
             
-        $categorySpending = $categoryQuery->get()
-            ->map(function($category) {
-                $percentage = $category->budget_limit > 0 ? ($category->value / $category->budget_limit * 100) : 0;
-                return [
-                    'name' => $category->name,
-                    'value' => (float) $category->value,
-                    'color' => $category->color,
-                    'budget_limit' => (float) $category->budget_limit,
-                    'percentage_used' => round($percentage, 1)
-                ];
-            });
+        $categorySpending = collect();
+        
+        foreach ($categories as $category) {
+            // Calculate spending for this category
+            $spendingQuery = \App\Models\Transaction::where('user_id', $userId)
+                ->where('category_id', $category->id)
+                ->where('type', 'expense');
+            
+            if ($dateRange) {
+                $spendingQuery->whereBetween('date', $dateRange);
+            }
+            
+            $spending = $spendingQuery->sum('amount');
+            
+            // Skip categories with no spending
+            if ($spending <= 0) {
+                continue;
+            }
+            
+            // Get active budget for this category
+            $budget = \App\Models\Budget::where('user_id', $userId)
+                ->where('category_id', $category->id)
+                ->whereDate('start_date', '<=', now())
+                ->whereDate('end_date', '>=', now())
+                ->first();
+            
+            $budgetLimit = $budget ? (float) $budget->amount : 0;
+            $percentage = $budgetLimit > 0 ? ($spending / $budgetLimit * 100) : 0;
+            
+            $categorySpending->push([
+                'name' => $category->name,
+                'value' => (float) $spending,
+                'color' => $category->color,
+                'budget_limit' => $budgetLimit,
+                'percentage_used' => round($percentage, 1)
+            ]);
+        }
+        
+        // Sort by spending amount descending
+        $categorySpending = $categorySpending->sortByDesc('value')->values();
 
         return response()->json([
             'total_balance' => (float) $totalBalance,
             'total_income' => (float) $totalIncome,
             'total_expenses' => (float) $totalExpenses,
-            'category_spending' => $categorySpending ? $categorySpending->values() : [],
+            'category_spending' => $categorySpending->all(),
             'period' => $period,
             'cached_at' => now()->toISOString(),
             'updated_at' => now()->toISOString()
