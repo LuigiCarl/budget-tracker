@@ -25,3 +25,6 @@ Thumbs.db
 
 # Budget Ease Frontend
 /frontend-budget-tracker
+
+# Database exports (contain sensitive data)
+/database/*.sql
