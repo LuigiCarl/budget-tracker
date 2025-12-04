@@ -6,13 +6,15 @@ use App\Models\Category;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Traits\CachesApiResponses;
 
 class CategoryController extends Controller
 {
-    use AuthorizesRequests;
+    use AuthorizesRequests, CachesApiResponses;
 
     /**
      * Display a listing of the resource.
+     * Cached for 10 minutes (categories change rarely)
      */
     public function index()
     {
@@ -57,7 +59,14 @@ class CategoryController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+                \Illuminate\Validation\Rule::unique('categories')
+                    ->where('user_id', Auth::id())
+                    ->where('type', $request->type)
+            ],
             'type' => 'required|in:income,expense',
             'description' => 'nullable|string|max:500',
             'color' => 'required|string|regex:/^#?[A-Fa-f0-9]{6}$/',
@@ -83,6 +92,9 @@ class CategoryController extends Controller
         if ($request->boolean('is_default')) {
             $category->setAsDefault();
         }
+        
+        // Clear category caches
+        $this->clearCategoryCaches();
 
         // Return JSON for API requests
         if ($request->expectsJson() || $request->is('api/*')) {
@@ -186,6 +198,9 @@ class CategoryController extends Controller
         if ($request->boolean('is_default')) {
             $category->setAsDefault();
         }
+        
+        // Clear category caches
+        $this->clearCategoryCaches();
 
         // Return JSON for API requests
         if (request()->expectsJson() || request()->is('api/*')) {
@@ -206,33 +221,51 @@ class CategoryController extends Controller
     {
         $category = Category::where('user_id', Auth::id())->findOrFail($id);
         
-        if ($category->transactions()->count() > 0) {
-            if (request()->expectsJson() || request()->is('api/*')) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Cannot delete category with existing transactions.'
-                ], 400);
-            }
-            return redirect()->route('categories.index')->with('error', 'Cannot delete category with existing transactions.');
+        // Check if category has transactions
+        $transactionCount = $category->transactions()->count();
+        if ($transactionCount > 0) {
+            // Find or create "Uncategorized" category
+            $uncategorized = Category::firstOrCreate(
+                [
+                    'user_id' => Auth::id(),
+                    'name' => 'Uncategorized',
+                    'type' => $category->type,
+                ],
+                [
+                    'color' => '#9CA3AF',
+                    'is_default' => true,
+                    'description' => 'Default category for uncategorized transactions',
+                ]
+            );
+            
+            // Reassign all transactions to Uncategorized
+            $category->transactions()->update(['category_id' => $uncategorized->id]);
         }
         
+        // Check if category has budgets
         if ($category->budgets()->count() > 0) {
             if (request()->expectsJson() || request()->is('api/*')) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Cannot delete category with existing budgets.'
+                    'message' => 'Cannot delete category with existing budgets. Please delete the budgets first.'
                 ], 400);
             }
             return redirect()->route('categories.index')->with('error', 'Cannot delete category with existing budgets.');
         }
         
         $category->delete();
+        
+        // Clear category caches
+        $this->clearCategoryCaches();
 
         // Return JSON for API requests
         if (request()->expectsJson() || request()->is('api/*')) {
+            $message = $transactionCount > 0 
+                ? "Category deleted successfully. {$transactionCount} transaction(s) moved to Uncategorized."
+                : 'Category deleted successfully.';
             return response()->json([
                 'success' => true,
-                'message' => 'Category deleted successfully.'
+                'message' => $message
             ]);
         }
 

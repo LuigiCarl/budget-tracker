@@ -10,21 +10,42 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Http\Traits\CachesApiResponses;
 
 class TransactionController extends Controller
 {
-    use AuthorizesRequests;
+    use AuthorizesRequests, CachesApiResponses;
 
     /**
      * Display a listing of the resource.
+     * Cached for 2 minutes (transactions change often)
      */
-    public function index()
+    public function index(Request $request)
     {
-        $transactions = \App\Models\Transaction::where('user_id', Auth::id())
+        $page = $request->get('page', 1);
+        $perPage = $request->get('per_page', 20);
+        $type = $request->get('type');
+        $categoryId = $request->get('category_id');
+        $accountId = $request->get('account_id');
+        $year = $request->get('year');
+        $month = $request->get('month');
+        
+        $query = \App\Models\Transaction::where('user_id', Auth::id())
             ->with(['account', 'category'])
-            ->orderBy('date', 'desc')
+            ->when($type && $type !== 'all', fn($q) => $q->where('type', $type))
+            ->when($categoryId, fn($q) => $q->where('category_id', $categoryId))
+            ->when($accountId, fn($q) => $q->where('account_id', $accountId));
+        
+        // Filter by year and month if provided
+        if ($year && $month) {
+            $startOfMonth = sprintf('%04d-%02d-01', $year, $month);
+            $endOfMonth = date('Y-m-t', strtotime($startOfMonth));
+            $query->whereBetween('date', [$startOfMonth, $endOfMonth]);
+        }
+        
+        $transactions = $query->orderBy('date', 'desc')
             ->orderBy('created_at', 'desc')
-            ->paginate(20);
+            ->paginate($perPage);
 
         // Return JSON for API requests
         if (request()->expectsJson() || request()->is('api/*')) {
@@ -92,6 +113,93 @@ class TransactionController extends Controller
     }
 
     /**
+     * Check budget status before creating a transaction.
+     * Returns warning if budget will be exceeded.
+     */
+    public function checkBudget(Request $request)
+    {
+        $request->validate([
+            'category_id' => 'required|exists:categories,id',
+            'amount' => 'required|numeric|min:0.01',
+            'date' => 'required|date',
+            'type' => 'required|in:income,expense',
+        ]);
+
+        // Only check budget for expenses
+        if ($request->type !== 'expense') {
+            return response()->json([
+                'success' => true,
+                'has_budget' => false,
+                'message' => 'No budget check needed for income'
+            ]);
+        }
+
+        $category = \App\Models\Category::where('user_id', Auth::id())->findOrFail($request->category_id);
+        
+        $activeBudget = $category->budgets()
+            ->where('start_date', '<=', $request->date)
+            ->where('end_date', '>=', $request->date)
+            ->first();
+
+        if (!$activeBudget) {
+            return response()->json([
+                'success' => true,
+                'has_budget' => false,
+                'message' => 'No budget set for this category'
+            ]);
+        }
+
+        $remaining = max($activeBudget->remaining_amount, 0);
+        $spent = $activeBudget->spent_amount;
+        $budgetAmount = $activeBudget->amount;
+        $percentUsed = $budgetAmount > 0 ? ($spent / $budgetAmount) * 100 : 0;
+        $percentAfterTransaction = $budgetAmount > 0 ? (($spent + $request->amount) / $budgetAmount) * 100 : 0;
+        $wouldExceed = $activeBudget->wouldExceedWith($request->amount);
+        $overspendAmount = max($request->amount - $remaining, 0);
+
+        $budgetInfo = [
+            'budget_id' => $activeBudget->id,
+            'budget_amount' => $budgetAmount,
+            'spent' => $spent,
+            'remaining' => $remaining,
+            'percent_used' => round($percentUsed, 1),
+            'percent_after_transaction' => round($percentAfterTransaction, 1),
+            'is_limiter' => $activeBudget->is_limiter,
+            'category_name' => $category->name,
+            'would_exceed' => $wouldExceed,
+            'overspend_amount' => $overspendAmount,
+        ];
+
+        $warningLevel = 'none';
+        $warningMessage = null;
+
+        if ($wouldExceed) {
+            if ($activeBudget->is_limiter) {
+                $warningLevel = 'error';
+                $warningMessage = "This expense exceeds your budget limit for {$category->name}. Remaining: ₱" . number_format($remaining, 2);
+            } else {
+                $warningLevel = 'warning';
+                $warningMessage = "This expense will exceed your budget for {$category->name} by ₱" . number_format($overspendAmount, 2);
+            }
+        } else if ($percentAfterTransaction >= 90) {
+            $warningLevel = 'warning';
+            $warningMessage = "This will use " . round($percentAfterTransaction, 1) . "% of your {$category->name} budget.";
+        } else if ($percentAfterTransaction >= 75) {
+            $warningLevel = 'info';
+            $warningMessage = "After this, you'll have used " . round($percentAfterTransaction, 1) . "% of your {$category->name} budget.";
+        }
+
+        return response()->json([
+            'success' => true,
+            'has_budget' => true,
+            'budget_info' => $budgetInfo,
+            'warning_level' => $warningLevel,
+            'warning_message' => $warningMessage,
+            'can_proceed' => !($wouldExceed && $activeBudget->is_limiter),
+        ]);
+    }
+
+    /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
@@ -124,6 +232,10 @@ class TransactionController extends Controller
             return back()->withErrors(['category_id' => 'Category type must match transaction type.']);
         }
 
+        // Initialize budget tracking variables
+        $budgetWarning = null;
+        $budgetInfo = null;
+
         // Check budget constraints for expenses
         if ($request->type === 'expense') {
             $activeBudget = $category->budgets()
@@ -131,14 +243,26 @@ class TransactionController extends Controller
                 ->where('end_date', '>=', $request->date)
                 ->first();
 
-            $budgetWarning = null;
             $isLimiterBudget = false;
 
             if ($activeBudget) {
                 $isLimiterBudget = $activeBudget->is_limiter;
+                $remaining = max($activeBudget->remaining_amount, 0);
+                $spent = $activeBudget->spent_amount;
+                $budgetAmount = $activeBudget->amount;
+                $percentUsed = $budgetAmount > 0 ? ($spent / $budgetAmount) * 100 : 0;
+                
+                $budgetInfo = [
+                    'budget_id' => $activeBudget->id,
+                    'budget_amount' => $budgetAmount,
+                    'spent' => $spent,
+                    'remaining' => $remaining,
+                    'percent_used' => round($percentUsed, 1),
+                    'is_limiter' => $isLimiterBudget,
+                    'category_name' => $category->name,
+                ];
                 
                 if ($activeBudget->wouldExceedWith($request->amount)) {
-                    $remaining = max($activeBudget->remaining_amount, 0);
                     $overspendAmount = $request->amount - $remaining;
                     
                     if ($isLimiterBudget) {
@@ -148,6 +272,10 @@ class TransactionController extends Controller
                             return response()->json([
                                 'success' => false,
                                 'message' => $errorMessage,
+                                'budget_exceeded' => true,
+                                'is_hard_limit' => true,
+                                'budget_info' => $budgetInfo,
+                                'overspend_amount' => $overspendAmount,
                                 'errors' => [
                                     'amount' => [$errorMessage]
                                 ]
@@ -160,6 +288,9 @@ class TransactionController extends Controller
                         // Soft limit - allow but warn
                         $budgetWarning = "This expense will exceed your budget for {$category->name} by $" . number_format($overspendAmount, 2);
                     }
+                } else if ($percentUsed >= 80) {
+                    // Warn when approaching budget limit (80%+)
+                    $budgetWarning = "After this transaction, you'll have used " . round($percentUsed + (($request->amount / $budgetAmount) * 100), 1) . "% of your {$category->name} budget.";
                 }
             }
         }
@@ -184,10 +315,14 @@ class TransactionController extends Controller
                 $account->decrement('balance', $request->amount);
             }
         });
+        
+        // Clear related caches
+        $this->clearTransactionCaches();
 
         $successMessage = 'Transaction created successfully.';
+        $hasWarning = false;
         if (isset($budgetWarning)) {
-            $successMessage .= ' Warning: ' . $budgetWarning;
+            $hasWarning = true;
         }
 
         // Return JSON for API requests
@@ -195,7 +330,9 @@ class TransactionController extends Controller
             return response()->json([
                 'success' => true,
                 'transaction' => $transaction,
-                'message' => $successMessage
+                'message' => $successMessage,
+                'budget_warning' => $budgetWarning,
+                'budget_info' => $budgetInfo ?? null,
             ], 201);
         }
 
@@ -305,6 +442,9 @@ class TransactionController extends Controller
                 $account->decrement('balance', $request->amount);
             }
         });
+        
+        // Clear related caches
+        $this->clearTransactionCaches();
 
         // Return JSON for API requests
         if (request()->expectsJson() || request()->is('api/*')) {
@@ -336,6 +476,9 @@ class TransactionController extends Controller
 
             $transaction->delete();
         });
+        
+        // Clear related caches
+        $this->clearTransactionCaches();
 
         // Return JSON for API requests
         if (request()->expectsJson() || request()->is('api/*')) {

@@ -27,10 +27,27 @@ class AuthenticatedSessionController extends Controller
     {
         $request->authenticate();
 
+        /** @var User $user */
+        $user = Auth::user();
+
+        // Check if user is blocked
+        if ($user->status === 'blocked') {
+            Auth::logout();
+            
+            if ($request->expectsJson() || $request->is('api/*')) {
+                return response()->json([
+                    'message' => 'Your account has been blocked. Please contact support.',
+                    'blocked' => true
+                ], 403);
+            }
+            
+            return back()->withErrors([
+                'email' => 'Your account has been blocked. Please contact support.',
+            ]);
+        }
+
         // Check if this is an API request
         if ($request->expectsJson() || $request->is('api/*')) {
-            /** @var User $user */
-            $user = Auth::user();
             $token = $user->createToken('auth_token')->plainTextToken;
 
             return response()->json([

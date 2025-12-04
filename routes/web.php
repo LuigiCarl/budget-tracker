@@ -32,17 +32,6 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/budget-progress', [DashboardController::class, 'getBudgetProgress'])->name('dashboard.api.budgets');
     });
     
-    // Debug route to test if dashboard controller works
-    Route::get('/debug/dashboard', function () {
-        $controller = new \App\Http\Controllers\DashboardController();
-        try {
-            $result = $controller->getStats(request());
-            return response()->json(['success' => true, 'data' => $result]);
-        } catch (\Exception $e) {
-            return response()->json(['success' => false, 'error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
-        }
-    });
-    
     // Accounts
     Route::resource('accounts', AccountController::class);
     

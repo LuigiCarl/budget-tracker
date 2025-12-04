@@ -47,7 +47,10 @@ class Account extends Model
         return [
             'cash' => 'Cash',
             'bank' => 'Bank Account',
+            'checking' => 'Checking Account',
+            'savings' => 'Savings Account',
             'credit_card' => 'Credit Card',
+            'investment' => 'Investment Account',
         ];
     }
 }

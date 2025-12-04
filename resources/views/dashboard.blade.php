@@ -356,7 +356,7 @@ function dashboardAnalytics() {
         async loadDashboardStats() {
             try {
                 console.log('Loading dashboard stats for period:', this.selectedPeriod);
-                const response = await fetch(`/api/web/dashboard/stats?period=${this.selectedPeriod}`, {
+                const response = await fetch(`/api/dashboard/stats?period=${this.selectedPeriod}`, {
                     headers: {
                         'Accept': 'application/json',
                         'X-Requested-With': 'XMLHttpRequest',
@@ -373,8 +373,8 @@ function dashboardAnalytics() {
                     // Map backend response to frontend structure
                     this.dashboardStats = {
                         total_balance: data.total_balance || 0,
-                        total_income: data.income || 0,
-                        total_expenses: data.expenses || 0,
+                        total_income: data.total_income || 0,
+                        total_expenses: data.total_expenses || 0,
                         category_spending: (data.category_spending || []).map((cat, index) => ({
                             name: cat.name,
                             value: parseFloat(cat.value),
@@ -397,7 +397,7 @@ function dashboardAnalytics() {
         async loadRecentTransactions() {
             try {
                 console.log('Loading recent transactions, limit:', this.transactionLimit);
-                const response = await fetch(`/api/web/dashboard/recent-transactions?limit=${this.transactionLimit}`, {
+                const response = await fetch(`/api/dashboard/recent-transactions?limit=${this.transactionLimit}`, {
                     headers: {
                         'Accept': 'application/json',
                         'X-Requested-With': 'XMLHttpRequest',
@@ -438,7 +438,7 @@ function dashboardAnalytics() {
         async loadMonthlyAnalytics() {
             try {
                 console.log('Loading monthly analytics...');
-                const response = await fetch('/api/web/dashboard/monthly-analytics?months=6&auto_detect=true', {
+                const response = await fetch('/api/dashboard/monthly-analytics?months=6&auto_detect=true', {
                     headers: {
                         'Accept': 'application/json',
                         'X-Requested-With': 'XMLHttpRequest',
@@ -472,7 +472,7 @@ function dashboardAnalytics() {
         async loadBudgetProgress() {
             try {
                 console.log('Loading budget progress...');
-                const response = await fetch('/api/web/dashboard/budget-progress', {
+                const response = await fetch('/api/dashboard/budget-progress', {
                     headers: {
                         'Accept': 'application/json',
                         'X-Requested-With': 'XMLHttpRequest',

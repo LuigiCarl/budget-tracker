@@ -6,18 +6,68 @@ use App\Models\Account;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Traits\CachesApiResponses;
 
 class AccountController extends Controller
 {
-    use AuthorizesRequests;
+    use AuthorizesRequests, CachesApiResponses;
+    
     /**
      * Display a listing of the resource.
+     * Cached for 5 minutes
      */
-    public function index()
+    public function index(Request $request)
     {
-        $accounts = \App\Models\Account::where('user_id', Auth::id())
-            ->withCount('transactions')
-            ->get();
+        // Validate year/month parameters to prevent injection
+        $request->validate([
+            'year' => 'nullable|integer|min:2000|max:2100',
+            'month' => 'nullable|integer|min:1|max:12',
+        ]);
+        
+        $query = \App\Models\Account::where('user_id', Auth::id());
+        
+        // If year and month are provided, include transaction totals for that period
+        if ($request->has('year') && $request->has('month')) {
+            $year = (int) $request->get('year');
+            $month = (int) $request->get('month');
+            
+            $startOfMonth = sprintf('%04d-%02d-01', $year, $month);
+            $endOfMonth = date('Y-m-t', strtotime($startOfMonth));
+            
+            $accounts = $query->get()->map(function($account) use ($startOfMonth, $endOfMonth) {
+                // Check if account existed in this month
+                // Account exists if it was created on or before the end of the month
+                $accountCreatedDate = $account->created_at->format('Y-m-d');
+                $accountExistedInMonth = $accountCreatedDate <= $endOfMonth;
+                
+                if (!$accountExistedInMonth) {
+                    // Account didn't exist yet, return with zero balance for this month
+                    $account->month_income = 0;
+                    $account->month_expenses = 0;
+                    $account->month_transaction_count = 0;
+                    $account->month_balance = 0;
+                    $account->account_existed = false;
+                    return $account;
+                }
+                
+                // Account existed, get transactions for this month only
+                $monthTransactions = $account->transactions()
+                    ->whereBetween('date', [$startOfMonth, $endOfMonth])
+                    ->get();
+                
+                $account->month_income = $monthTransactions->where('type', 'income')->sum('amount');
+                $account->month_expenses = $monthTransactions->where('type', 'expense')->sum('amount');
+                $account->month_transaction_count = $monthTransactions->count();
+                
+                // Calculate balance for this month (sum of transactions in this month)
+                $account->month_balance = $account->month_income - $account->month_expenses;
+                $account->account_existed = true;
+                
+                return $account;
+            });
+        } else {
+            $accounts = $query->withCount('transactions')->get();
+        }
 
         // Return JSON for API requests
         if (request()->expectsJson() || request()->is('api/*')) {
@@ -77,6 +127,9 @@ class AccountController extends Controller
             'balance' => $request->balance,
             'description' => $request->description,
         ]);
+        
+        // Clear account caches
+        $this->clearAccountCaches();
 
         // Return JSON for API requests
         if ($request->expectsJson() || $request->is('api/*')) {
@@ -167,6 +220,9 @@ class AccountController extends Controller
             'balance' => $request->balance,
             'description' => $request->description,
         ]);
+        
+        // Clear account caches
+        $this->clearAccountCaches();
 
         // Return JSON for API requests
         if (request()->expectsJson() || request()->is('api/*')) {
@@ -198,6 +254,9 @@ class AccountController extends Controller
         }
         
         $account->delete();
+        
+        // Clear account caches
+        $this->clearAccountCaches();
 
         // Return JSON for API requests
         if (request()->expectsJson() || request()->is('api/*')) {

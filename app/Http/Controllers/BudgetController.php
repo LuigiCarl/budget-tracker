@@ -8,30 +8,86 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
+use App\Http\Traits\CachesApiResponses;
 
 class BudgetController extends Controller
 {
-    use AuthorizesRequests;
+    use AuthorizesRequests, CachesApiResponses;
 
     /**
      * Display a listing of the resource.
+     * Cached for 5 minutes
      */
-    public function index()
+    public function index(Request $request)
     {
-        $budgets = \App\Models\Budget::where('user_id', Auth::id())
-            ->with('category')
-            ->orderBy('start_date', 'desc')
-            ->paginate(15);
+        // Validate year/month parameters to prevent injection
+        $request->validate([
+            'year' => 'nullable|integer|min:2000|max:2100',
+            'month' => 'nullable|integer|min:1|max:12',
+        ]);
+        
+        $query = \App\Models\Budget::where('user_id', Auth::id())
+            ->with('category');
+        
+        $startOfMonth = null;
+        $endOfMonth = null;
+        
+        // Filter by month/year if provided
+        if ($request->has('year') && $request->has('month')) {
+            $year = (int) $request->get('year');
+            $month = (int) $request->get('month');
+            
+            // Get first and last day of the month
+            $startOfMonth = sprintf('%04d-%02d-01', $year, $month);
+            $endOfMonth = date('Y-m-t', strtotime($startOfMonth));
+            
+            // Get budgets that overlap with the selected month
+            $query->where(function($q) use ($startOfMonth, $endOfMonth) {
+                $q->where(function($inner) use ($startOfMonth, $endOfMonth) {
+                    // Budget starts before month end AND ends after month start (overlaps)
+                    $inner->where('start_date', '<=', $endOfMonth)
+                          ->where('end_date', '>=', $startOfMonth);
+                });
+            });
+        }
+        
+        $budgetsPaginated = $query->orderBy('start_date', 'desc')->paginate(15);
+        
+        // If month filtering is active, calculate spent amounts for that month
+        if ($startOfMonth && $endOfMonth) {
+            $userId = Auth::id();
+            $budgetsPaginated->getCollection()->transform(function($budget) use ($startOfMonth, $endOfMonth, $userId) {
+                // Calculate the overlap period between budget and selected month
+                $effectiveStart = max($budget->start_date, $startOfMonth);
+                $effectiveEnd = min($budget->end_date, $endOfMonth);
+                
+                // Get transactions within the effective period
+                $spent = \App\Models\Transaction::where('user_id', $userId)
+                    ->where('category_id', $budget->category_id)
+                    ->where('type', 'expense')
+                    ->whereBetween('date', [$effectiveStart, $effectiveEnd])
+                    ->sum('amount');
+                
+                $percentage = $budget->amount > 0 ? ($spent / $budget->amount) * 100 : 0;
+                
+                $budget->spent = (float) $spent;
+                $budget->percentage = min(round($percentage, 1), 100);
+                $budget->is_exceeded = $spent > $budget->amount;
+                $budget->remaining = (float) ($budget->amount - $spent);
+                
+                return $budget;
+            });
+        }
 
         // Return JSON for API requests
         if (request()->expectsJson() || request()->is('api/*')) {
             return response()->json([
                 'success' => true,
-                'budgets' => $budgets
+                'budgets' => $budgetsPaginated
             ]);
         }
             
-        return view('budgets.index', compact('budgets'));
+        return view('budgets.index', ['budgets' => $budgetsPaginated]);
     }
 
     /**
@@ -84,7 +140,7 @@ class BudgetController extends Controller
         if (request()->expectsJson() || request()->is('api/*')) {
             $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
                 'category_id' => 'required|exists:categories,id',
-                'name' => 'required|string|max:255',
+                'name' => 'nullable|string|max:255',
                 'amount' => 'required|numeric|min:0.01',
                 'start_date' => 'required|date',
                 'end_date' => 'required|date|after:start_date',
@@ -102,7 +158,7 @@ class BudgetController extends Controller
         } else {
             $request->validate([
                 'category_id' => 'required|exists:categories,id',
-                'name' => 'required|string|max:255',
+                'name' => 'nullable|string|max:255',
                 'amount' => 'required|numeric|min:0.01',
                 'start_date' => 'required|date',
                 'end_date' => 'required|date|after:start_date',
@@ -155,16 +211,22 @@ class BudgetController extends Controller
             return redirect()->back()->withInput()->with('error', 'A budget for this category already exists in the selected time period.');
         }
 
+        // Auto-generate budget name from category if not provided
+        $budgetName = $request->name ?? $category->name . ' Budget';
+
         $budget = \App\Models\Budget::create([
             'user_id' => Auth::id(),
             'category_id' => $request->category_id,
-            'name' => $request->name,
+            'name' => $budgetName,
             'amount' => $request->amount,
             'start_date' => $request->start_date,
             'end_date' => $request->end_date,
             'description' => $request->description,
             'is_limiter' => $request->boolean('is_limiter', false),
         ]);
+        
+        // Clear budget caches
+        $this->clearBudgetCaches();
 
         // Return JSON for API requests
         if (request()->expectsJson() || request()->is('api/*')) {
@@ -242,7 +304,7 @@ class BudgetController extends Controller
         if (request()->expectsJson() || request()->is('api/*')) {
             $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
                 'category_id' => 'required|exists:categories,id',
-                'name' => 'required|string|max:255',
+                'name' => 'nullable|string|max:255',
                 'amount' => 'required|numeric|min:0.01',
                 'start_date' => 'required|date',
                 'end_date' => 'required|date|after:start_date',
@@ -260,7 +322,7 @@ class BudgetController extends Controller
         } else {
             $request->validate([
                 'category_id' => 'required|exists:categories,id',
-                'name' => 'required|string|max:255',
+                'name' => 'nullable|string|max:255',
                 'amount' => 'required|numeric|min:0.01',
                 'start_date' => 'required|date',
                 'end_date' => 'required|date|after:start_date',
@@ -303,15 +365,21 @@ class BudgetController extends Controller
             ]);
         }
 
+        // Auto-generate budget name from category if not provided
+        $budgetName = $request->name ?? $category->name . ' Budget';
+
         $budget->update([
             'category_id' => $request->category_id,
-            'name' => $request->name,
+            'name' => $budgetName,
             'amount' => $request->amount,
             'start_date' => $request->start_date,
             'end_date' => $request->end_date,
             'description' => $request->description,
             'is_limiter' => $request->boolean('is_limiter', false),
         ]);
+        
+        // Clear budget caches
+        $this->clearBudgetCaches();
 
         // Return JSON for API requests
         if (request()->expectsJson() || request()->is('api/*')) {
@@ -333,6 +401,9 @@ class BudgetController extends Controller
         $budget = \App\Models\Budget::where('user_id', Auth::id())->findOrFail($id);
         
         $budget->delete();
+        
+        // Clear budget caches
+        $this->clearBudgetCaches();
 
         // Return JSON for API requests
         if (request()->expectsJson() || request()->is('api/*')) {

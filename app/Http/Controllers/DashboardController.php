@@ -10,9 +10,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
+use App\Http\Traits\CachesApiResponses;
 
 class DashboardController extends Controller
 {
+    use CachesApiResponses;
+    
     /**
      * Dashboard Overview - Web View
      * Simple view that loads data via API calls
@@ -28,40 +32,95 @@ class DashboardController extends Controller
      * Dashboard Statistics API
      * GET /api/dashboard/stats
      * Returns comprehensive dashboard statistics for frontend
+     * 
+     * Supports:
+     * - period: current_month, current_week, etc.
+     * - year & month: specific month (e.g., year=2025&month=11 for November 2025)
+     * 
+     * Cached for 5 minutes to reduce database load
      */
     public function getStats(Request $request)
     {
         $userId = Auth::id();
-        
-        // Calculate total balance from all user accounts
-        $totalBalance = \App\Models\Account::where('user_id', $userId)->sum('balance');
-        
-        // Calculate all-time totals
-        $totalIncome = \App\Models\Transaction::where('user_id', $userId)
-            ->where('type', 'income')
-            ->sum('amount');
-            
-        $totalExpenses = \App\Models\Transaction::where('user_id', $userId)
-            ->where('type', 'expense')
-            ->sum('amount');
-        
-        // Calculate category spending - if no period specified, use all-time data when total_expenses > 0
         $period = $request->get('period', 'current_month');
+        $year = $request->get('year');
+        $month = $request->get('month');
         
-        // If no period specified and we have expenses but no current month data, use all-time
-        if ($period === 'current_month' && $totalExpenses > 0) {
-            $currentMonthExpenses = \App\Models\Transaction::where('user_id', $userId)
-                ->where('type', 'expense')
-                ->whereBetween('date', $this->getDateRange('current_month'))
-                ->sum('amount');
-            
-            if ($currentMonthExpenses == 0) {
-                $period = 'all_time'; // Use all-time data if no current month expenses
-            }
+        // Build cache key with all params
+        $cacheParams = ['period' => $period];
+        if ($year && $month) {
+            $cacheParams['year'] = $year;
+            $cacheParams['month'] = $month;
         }
         
-        $dateRange = $period === 'all_time' ? null : $this->getDateRange($period);
+        return $this->cachedResponse(
+            'dashboard:stats',
+            function () use ($userId, $period, $year, $month) {
+                return $this->computeStats($userId, $period, $year, $month);
+            },
+            $this->shortCacheTtl, // Use shorter cache for faster updates
+            $cacheParams
+        );
+    }
+    
+    /**
+     * Compute dashboard stats (extracted for caching)
+     */
+    private function computeStats($userId, $period, $year = null, $month = null)
+    {
+        // Determine date range first
+        $dateRange = null;
+        if ($year && $month) {
+            // Use specific year/month
+            $startDate = \Carbon\Carbon::create($year, $month, 1)->startOfMonth()->toDateString();
+            $endDate = \Carbon\Carbon::create($year, $month, 1)->endOfMonth()->toDateString();
+            $dateRange = [$startDate, $endDate];
+        } elseif ($period !== 'all_time') {
+            $dateRange = $this->getDateRange($period);
+        }
         
+        // Calculate total balance for the selected month
+        // This is the sum of income - expenses for accounts that existed in that month
+        if ($dateRange) {
+            $endOfMonth = $dateRange[1];
+            
+            // Get accounts that existed in this month (created on or before end of month)
+            $accountIds = \App\Models\Account::where('user_id', $userId)
+                ->whereDate('created_at', '<=', $endOfMonth)
+                ->pluck('id');
+            
+            // Calculate net balance for the month from those accounts
+            $monthIncome = \App\Models\Transaction::where('user_id', $userId)
+                ->whereIn('account_id', $accountIds)
+                ->where('type', 'income')
+                ->whereBetween('date', $dateRange)
+                ->sum('amount');
+                
+            $monthExpenses = \App\Models\Transaction::where('user_id', $userId)
+                ->whereIn('account_id', $accountIds)
+                ->where('type', 'expense')
+                ->whereBetween('date', $dateRange)
+                ->sum('amount');
+                
+            $totalBalance = $monthIncome - $monthExpenses;
+        } else {
+            // For all-time, use the sum of all account balances
+            $totalBalance = \App\Models\Account::where('user_id', $userId)->sum('balance');
+        }
+        
+        // Calculate totals based on date range
+        $incomeQuery = \App\Models\Transaction::where('user_id', $userId)->where('type', 'income');
+        $expenseQuery = \App\Models\Transaction::where('user_id', $userId)->where('type', 'expense');
+        
+        if ($dateRange) {
+            $incomeQuery->whereBetween('date', $dateRange);
+            $expenseQuery->whereBetween('date', $dateRange);
+        }
+        
+        $totalIncome = $incomeQuery->sum('amount');
+        $totalExpenses = $expenseQuery->sum('amount');
+        
+        // Calculate category spending with date range
         $categoryQuery = \App\Models\Category::where('categories.user_id', $userId)
             ->where('categories.type', 'expense')
             ->select('categories.id', 'categories.name', 'categories.color')
@@ -72,7 +131,7 @@ class DashboardController extends Controller
                      ->where('transactions.type', '=', 'expense')
                      ->where('transactions.user_id', '=', $userId);
                 
-                // Only apply date filter if not all-time
+                // Apply date filter
                 if ($dateRange !== null) {
                     $join->whereBetween('transactions.date', $dateRange);
                 }
@@ -101,10 +160,11 @@ class DashboardController extends Controller
 
         return response()->json([
             'total_balance' => (float) $totalBalance,
-            'income' => (float) $totalIncome,
-            'expenses' => (float) $totalExpenses,
+            'total_income' => (float) $totalIncome,
+            'total_expenses' => (float) $totalExpenses,
             'category_spending' => $categorySpending ? $categorySpending->values() : [],
             'period' => $period,
+            'cached_at' => now()->toISOString(),
             'updated_at' => now()->toISOString()
         ]);
     }
@@ -113,51 +173,91 @@ class DashboardController extends Controller
      * Recent Transactions API  
      * GET /api/dashboard/recent-transactions
      * Returns recent transactions with optional limit
+     * 
+     * Cached for 1 minute (transactions change often)
      */
     public function getRecentTransactions(Request $request)
     {
         $request->validate([
-            'limit' => 'integer|min:1|max:50'
+            'limit' => 'integer|min:1|max:50',
+            'year' => 'integer|min:2000|max:2100',
+            'month' => 'integer|min:1|max:12'
         ]);
         
         $limit = $request->get('limit', 5);
+        $year = $request->get('year');
+        $month = $request->get('month');
         $userId = Auth::id();
         
-        $transactions = \App\Models\Transaction::where('user_id', $userId)
-            ->with(['category:id,name,color,type', 'account:id,name'])
-            ->orderBy('date', 'desc')
-            ->orderBy('created_at', 'desc')
-            ->limit($limit)
-            ->get()
-            ->map(function($transaction) {
-                // Make expenses negative for frontend display
-                $amount = $transaction->type === 'expense' ? -abs($transaction->amount) : $transaction->amount;
+        // Build cache key with all params
+        $cacheParams = ['limit' => $limit];
+        if ($year && $month) {
+            $cacheParams['year'] = $year;
+            $cacheParams['month'] = $month;
+        }
+        
+        return $this->cachedResponse(
+            'dashboard:recent-transactions',
+            function () use ($userId, $limit, $year, $month) {
+                $query = \App\Models\Transaction::where('user_id', $userId)
+                    ->with(['category:id,name,color,type', 'account:id,name']);
                 
-                return [
-                    'id' => $transaction->id,
-                    'name' => $transaction->description ?? $transaction->category->name,
-                    'date' => $transaction->date,
-                    'amount' => (float) $amount,
-                    'type' => $transaction->type,
-                    'category' => $transaction->category->name,
-                    'account' => $transaction->account->name
-                ];
-            });
+                // Apply month filter if specified
+                if ($year && $month) {
+                    $startDate = \Carbon\Carbon::create($year, $month, 1)->startOfMonth()->toDateString();
+                    $endDate = \Carbon\Carbon::create($year, $month, 1)->endOfMonth()->toDateString();
+                    $query->whereBetween('date', [$startDate, $endDate]);
+                }
+                
+                $transactions = $query->orderBy('date', 'desc')
+                    ->orderBy('created_at', 'desc')
+                    ->limit($limit)
+                    ->get()
+                    ->map(function($transaction) {
+                        // Make expenses negative for frontend display
+                        $amount = $transaction->type === 'expense' ? -abs($transaction->amount) : $transaction->amount;
+                        
+                        return [
+                            'id' => $transaction->id,
+                            'name' => $transaction->description ?? $transaction->category->name,
+                            'date' => $transaction->date,
+                            'amount' => (float) $amount,
+                            'type' => $transaction->type,
+                            'category' => [
+                                'name' => $transaction->category->name,
+                                'color' => $transaction->category->color ?? '#6366F1'
+                            ],
+                            'account' => $transaction->account->name
+                        ];
+                    });
 
-        // Get total transaction count
-        $totalCount = \App\Models\Transaction::where('user_id', $userId)->count();
+                // Get total transaction count for the period
+                $totalCountQuery = \App\Models\Transaction::where('user_id', $userId);
+                if ($year && $month) {
+                    $startDate = \Carbon\Carbon::create($year, $month, 1)->startOfMonth()->toDateString();
+                    $endDate = \Carbon\Carbon::create($year, $month, 1)->endOfMonth()->toDateString();
+                    $totalCountQuery->whereBetween('date', [$startDate, $endDate]);
+                }
+                $totalCount = $totalCountQuery->count();
 
-        return response()->json([
-            'transactions' => $transactions,
-            'total_count' => $totalCount,
-            'period' => 'last_30_days'
-        ]);
+                return response()->json([
+                    'transactions' => $transactions,
+                    'total_count' => $totalCount,
+                    'period' => ($year && $month) ? "{$year}-{$month}" : 'all_time',
+                    'cached_at' => now()->toISOString()
+                ]);
+            },
+            60, // 1 minute cache for faster updates
+            $cacheParams
+        );
     }
 
     /**
      * Monthly Analytics API
      * GET /api/dashboard/monthly-analytics
      * Returns monthly breakdown of income vs expenses
+     * 
+     * Cached for 10 minutes (analytics don't change often)
      * 
      * Parameters:
      * - months: number of months to show (3-12, default: 6)
@@ -175,9 +275,25 @@ class DashboardController extends Controller
         $monthCount = $request->get('months', 6);
         $userId = Auth::id();
         $autoDetect = $request->get('auto_detect', true);
+        $startDate = $request->get('start_date');
         
+        return $this->cachedResponse(
+            'dashboard:monthly-analytics',
+            function () use ($userId, $monthCount, $autoDetect, $startDate) {
+                return $this->computeMonthlyAnalytics($userId, $monthCount, $autoDetect, $startDate);
+            },
+            600, // 10 minutes
+            ['months' => $monthCount, 'auto_detect' => $autoDetect, 'start_date' => $startDate]
+        );
+    }
+    
+    /**
+     * Compute monthly analytics (extracted for caching)
+     */
+    private function computeMonthlyAnalytics($userId, $monthCount, $autoDetect, $startDate)
+    {
         // If auto_detect is enabled or no start_date provided, find the optimal date range
-        if ($autoDetect || !$request->has('start_date')) {
+        if ($autoDetect || !$startDate) {
             // Get the date range of actual transactions
             $transactionRange = \App\Models\Transaction::where('user_id', $userId)
                 ->selectRaw('MIN(date) as earliest, MAX(date) as latest')
@@ -192,7 +308,7 @@ class DashboardController extends Controller
             }
         } else {
             // Use provided start_date
-            $startFromDate = \Carbon\Carbon::parse($request->get('start_date'));
+            $startFromDate = \Carbon\Carbon::parse($startDate);
         }
         
         $monthlyData = [];
@@ -227,8 +343,9 @@ class DashboardController extends Controller
                 'start' => $startFromDate->copy()->subMonths($monthCount - 1)->startOfMonth()->toDateString(),
                 'end' => $startFromDate->copy()->endOfMonth()->toDateString()
             ],
-            'auto_detected' => $autoDetect && !$request->has('start_date'),
-            'data' => $monthlyData
+            'auto_detected' => $autoDetect && !$startDate,
+            'data' => $monthlyData,
+            'cached_at' => now()->toISOString()
         ]);
     }
 
@@ -236,48 +353,56 @@ class DashboardController extends Controller
      * Budget Progress API
      * GET /api/dashboard/budget-progress  
      * Returns current budget progress and status
+     * 
+     * Cached for 5 minutes
      */
     public function getBudgetProgress()
     {
         $userId = Auth::id();
-        $today = now()->toDateString();
         
-
-        
-        $budgets = \App\Models\Budget::where('user_id', $userId)
-            ->with('category:id,name,color')
-            ->whereDate('start_date', '<=', $today)
-            ->whereDate('end_date', '>=', $today)
-            ->get()
-            ->map(function($budget) {
-                $spent = \App\Models\Transaction::where('user_id', $budget->user_id)
-                    ->where('category_id', $budget->category_id)
-                    ->where('type', 'expense')
-                    ->whereBetween('date', [$budget->start_date, $budget->end_date])
-                    ->sum('amount');
+        return $this->cachedResponse(
+            'dashboard:budget-progress',
+            function () use ($userId) {
+                $today = now()->toDateString();
                 
-                $percentage = $budget->amount > 0 ? ($spent / $budget->amount) * 100 : 0;
-                
-                return [
-                    'id' => $budget->id,
-                    'name' => $budget->name,
-                    'category' => $budget->category->name,
-                    'color' => $budget->category->color,
-                    'amount' => (float) $budget->amount,
-                    'spent' => (float) $spent,
-                    'remaining' => (float) ($budget->amount - $spent),
-                    'percentage' => min(round($percentage, 1), 100),
-                    'is_exceeded' => $spent > $budget->amount,
-                    'is_limiter' => (bool) $budget->is_limiter,
-                    'days_remaining' => now()->diffInDays($budget->end_date, false)
-                ];
-            });
+                $budgets = \App\Models\Budget::where('user_id', $userId)
+                    ->with('category:id,name,color')
+                    ->whereDate('start_date', '<=', $today)
+                    ->whereDate('end_date', '>=', $today)
+                    ->get()
+                    ->map(function($budget) {
+                        $spent = \App\Models\Transaction::where('user_id', $budget->user_id)
+                            ->where('category_id', $budget->category_id)
+                            ->where('type', 'expense')
+                            ->whereBetween('date', [$budget->start_date, $budget->end_date])
+                            ->sum('amount');
+                        
+                        $percentage = $budget->amount > 0 ? ($spent / $budget->amount) * 100 : 0;
+                        
+                        return [
+                            'id' => $budget->id,
+                            'name' => $budget->name,
+                            'category' => $budget->category->name,
+                            'color' => $budget->category->color,
+                            'amount' => (float) $budget->amount,
+                            'spent' => (float) $spent,
+                            'remaining' => (float) ($budget->amount - $spent),
+                            'percentage' => min(round($percentage, 1), 100),
+                            'is_exceeded' => $spent > $budget->amount,
+                            'is_limiter' => (bool) $budget->is_limiter,
+                            'days_remaining' => now()->diffInDays($budget->end_date, false)
+                        ];
+                    });
 
-        return response()->json([
-            'active_budgets' => $budgets->values(),
-            'total_budgets' => $budgets->count(),
-            'exceeded_count' => $budgets->where('is_exceeded', true)->count()
-        ]);
+                return response()->json([
+                    'active_budgets' => $budgets->values(),
+                    'total_budgets' => $budgets->count(),
+                    'exceeded_count' => $budgets->where('is_exceeded', true)->count(),
+                    'cached_at' => now()->toISOString()
+                ]);
+            },
+            $this->defaultCacheTtl
+        );
     }
 
     /**

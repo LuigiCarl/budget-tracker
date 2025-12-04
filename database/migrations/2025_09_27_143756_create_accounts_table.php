@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->string('name');
-            $table->enum('type', ['cash', 'bank', 'credit_card']);
+            $table->enum('type', ['cash', 'bank', 'checking', 'savings', 'credit_card', 'investment']);
             $table->decimal('balance', 15, 2)->default(0);
             $table->string('description')->nullable();
             $table->timestamps();
