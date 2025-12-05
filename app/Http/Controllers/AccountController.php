@@ -175,24 +175,46 @@ class AccountController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show($id)
+    public function show(Request $request, $id)
     {
         $account = \App\Models\Account::where('user_id', Auth::id())
-            ->with('transactions.category')
             ->findOrFail($id);
         
-        $transactions = $account->transactions()
+        // Build transactions query with optional type filter
+        $transactionsQuery = $account->transactions()
             ->with('category')
             ->orderBy('date', 'desc')
-            ->orderBy('created_at', 'desc')
-            ->paginate(20);
+            ->orderBy('created_at', 'desc');
+        
+        // Filter by transaction type if provided
+        if ($request->has('type') && in_array($request->get('type'), ['income', 'expense'])) {
+            $transactionsQuery->where('type', $request->get('type'));
+        }
+        
+        $transactions = $transactionsQuery->paginate($request->get('per_page', 20));
+        
+        // Calculate account statistics (all-time)
+        $totalIncome = $account->transactions()->where('type', 'income')->sum('amount');
+        $totalExpenses = $account->transactions()->where('type', 'expense')->sum('amount');
+        
+        // Calculate initial balance (balance before any transactions)
+        // Current balance = initial_balance + income - expenses
+        // Therefore: initial_balance = current_balance - income + expenses
+        $currentBalance = (float) $account->balance;
+        $initialBalance = $currentBalance - $totalIncome + $totalExpenses;
 
         // Return JSON for API requests
         if (request()->expectsJson() || request()->is('api/*')) {
             return response()->json([
                 'success' => true,
                 'account' => $account,
-                'transactions' => $transactions
+                'transactions' => $transactions,
+                'stats' => [
+                    'initial_balance' => $initialBalance,
+                    'total_income' => $totalIncome,
+                    'total_expenses' => $totalExpenses,
+                    'current_balance' => $currentBalance,
+                ]
             ]);
         }
             
