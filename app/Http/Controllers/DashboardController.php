@@ -80,10 +80,12 @@ class DashboardController extends Controller
         }
         
         // Calculate total balance for the selected month
-        // This includes: initial balance of accounts + net transactions up to end of selected month
+        // account->balance already contains the current running balance (initial + all transactions)
+        // For historical months, we need to calculate what the balance WAS at that point
         if ($dateRange) {
             $endOfMonth = $dateRange[1];
             $startOfMonth = $dateRange[0];
+            $today = now()->format('Y-m-d');
             
             // Get accounts that existed in this month (created on or before end of month)
             $accounts = \App\Models\Account::where('user_id', $userId)
@@ -93,50 +95,33 @@ class DashboardController extends Controller
             $totalBalance = 0;
             
             foreach ($accounts as $account) {
-                // Start with the initial balance when account was created
-                $accountBalance = (float) $account->balance;
+                // Current balance from DB already includes all transactions ever made
+                $currentBalance = (float) $account->balance;
                 
-                // Add all transactions from account creation up to end of selected month
-                $accountCreatedDate = $account->created_at->format('Y-m-d');
-                
-                // Get all income transactions from account creation to end of month
-                $incomeUpToMonth = \App\Models\Transaction::where('account_id', $account->id)
-                    ->where('type', 'income')
-                    ->whereDate('date', '>=', $accountCreatedDate)
-                    ->whereDate('date', '<=', $endOfMonth)
-                    ->sum('amount');
-                
-                // Get all expense transactions from account creation to end of month
-                $expensesUpToMonth = \App\Models\Transaction::where('account_id', $account->id)
-                    ->where('type', 'expense')
-                    ->whereDate('date', '>=', $accountCreatedDate)
-                    ->whereDate('date', '<=', $endOfMonth)
-                    ->sum('amount');
-                
-                // Account balance = initial balance + income - expenses
-                $accountBalance += $incomeUpToMonth - $expensesUpToMonth;
-                $totalBalance += $accountBalance;
+                // If viewing current month or future, just use current balance
+                if ($endOfMonth >= $today) {
+                    $totalBalance += $currentBalance;
+                } else {
+                    // For past months, subtract transactions AFTER the end of that month
+                    // to get what the balance WAS at end of that month
+                    $incomeAfterMonth = \App\Models\Transaction::where('account_id', $account->id)
+                        ->where('type', 'income')
+                        ->whereDate('date', '>', $endOfMonth)
+                        ->sum('amount');
+                    
+                    $expensesAfterMonth = \App\Models\Transaction::where('account_id', $account->id)
+                        ->where('type', 'expense')
+                        ->whereDate('date', '>', $endOfMonth)
+                        ->sum('amount');
+                    
+                    // Balance at end of month = current balance - income after + expenses after
+                    $balanceAtEndOfMonth = $currentBalance - $incomeAfterMonth + $expensesAfterMonth;
+                    $totalBalance += $balanceAtEndOfMonth;
+                }
             }
         } else {
-            // For all-time, use the sum of all account balances plus net transactions
-            $accounts = \App\Models\Account::where('user_id', $userId)->get();
-            $totalBalance = 0;
-            
-            foreach ($accounts as $account) {
-                $accountBalance = (float) $account->balance;
-                
-                // Add net transactions since account creation
-                $income = \App\Models\Transaction::where('account_id', $account->id)
-                    ->where('type', 'income')
-                    ->sum('amount');
-                    
-                $expenses = \App\Models\Transaction::where('account_id', $account->id)
-                    ->where('type', 'expense')
-                    ->sum('amount');
-                
-                $accountBalance += $income - $expenses;
-                $totalBalance += $accountBalance;
-            }
+            // For all-time, just sum current balances (they already include all transactions)
+            $totalBalance = \App\Models\Account::where('user_id', $userId)->sum('balance');
         }
         
         // Calculate totals based on date range

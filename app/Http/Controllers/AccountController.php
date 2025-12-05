@@ -33,8 +33,9 @@ class AccountController extends Controller
             
             $startOfMonth = sprintf('%04d-%02d-01', $year, $month);
             $endOfMonth = date('Y-m-t', strtotime($startOfMonth));
+            $today = date('Y-m-d');
             
-            $accounts = $query->get()->map(function($account) use ($startOfMonth, $endOfMonth) {
+            $accounts = $query->get()->map(function($account) use ($startOfMonth, $endOfMonth, $today) {
                 // Check if account existed in this month
                 // Account exists if it was created on or before the end of the month
                 $accountCreatedDate = $account->created_at->format('Y-m-d');
@@ -63,37 +64,36 @@ class AccountController extends Controller
                 // Calculate net change for this month only (for display purposes)
                 $account->month_balance = $account->month_income - $account->month_expenses;
                 
-                // Calculate cumulative balance: initial balance + all transactions up to end of this month
-                $initialBalance = (float) $account->balance;
+                // Calculate cumulative balance
+                // account->balance is the CURRENT balance (already includes all transactions)
+                $currentBalance = (float) $account->balance;
                 
-                // Get all income from account creation to end of month
-                $incomeUpToMonth = $account->transactions()
-                    ->where('type', 'income')
-                    ->whereDate('date', '>=', $accountCreatedDate)
-                    ->whereDate('date', '<=', $endOfMonth)
-                    ->sum('amount');
+                if ($endOfMonth >= $today) {
+                    // Current or future month - use current balance
+                    $account->cumulative_balance = $currentBalance;
+                } else {
+                    // Past month - subtract transactions after end of month to get historical balance
+                    $incomeAfterMonth = $account->transactions()
+                        ->where('type', 'income')
+                        ->whereDate('date', '>', $endOfMonth)
+                        ->sum('amount');
+                    
+                    $expensesAfterMonth = $account->transactions()
+                        ->where('type', 'expense')
+                        ->whereDate('date', '>', $endOfMonth)
+                        ->sum('amount');
+                    
+                    $account->cumulative_balance = $currentBalance - $incomeAfterMonth + $expensesAfterMonth;
+                }
                 
-                // Get all expenses from account creation to end of month
-                $expensesUpToMonth = $account->transactions()
-                    ->where('type', 'expense')
-                    ->whereDate('date', '>=', $accountCreatedDate)
-                    ->whereDate('date', '<=', $endOfMonth)
-                    ->sum('amount');
-                
-                $account->cumulative_balance = $initialBalance + $incomeUpToMonth - $expensesUpToMonth;
                 $account->account_existed = true;
                 
                 return $account;
             });
         } else {
             $accounts = $query->withCount('transactions')->get()->map(function($account) {
-                // For non-filtered view, calculate current balance including initial balance
-                $initialBalance = (float) $account->balance;
-                
-                $totalIncome = $account->transactions()->where('type', 'income')->sum('amount');
-                $totalExpenses = $account->transactions()->where('type', 'expense')->sum('amount');
-                
-                $account->cumulative_balance = $initialBalance + $totalIncome - $totalExpenses;
+                // For non-filtered view, use current balance directly (it already includes all transactions)
+                $account->cumulative_balance = (float) $account->balance;
                 return $account;
             });
         }
