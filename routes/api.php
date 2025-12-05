@@ -81,6 +81,9 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
         'destroy' => 'api.accounts.destroy',
     ]);
     
+    // Account Transfer
+    Route::post('/accounts/transfer', [AccountController::class, 'transfer']);
+    
     // Categories API
     Route::apiResource('categories', CategoryController::class)->names([
         'index' => 'api.categories.index',

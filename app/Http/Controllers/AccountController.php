@@ -319,4 +319,108 @@ class AccountController extends Controller
 
         return redirect()->route('accounts.index')->with('success', 'Account deleted successfully.');
     }
+
+    /**
+     * Transfer money between accounts.
+     */
+    public function transfer(Request $request)
+    {
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+            'from_account_id' => 'required|integer|exists:accounts,id',
+            'to_account_id' => 'required|integer|exists:accounts,id|different:from_account_id',
+            'amount' => 'required|numeric|min:0.01',
+            'description' => 'nullable|string|max:500',
+            'date' => 'required|date',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $userId = Auth::id();
+        $fromAccount = Account::where('user_id', $userId)->findOrFail($request->from_account_id);
+        $toAccount = Account::where('user_id', $userId)->findOrFail($request->to_account_id);
+        $amount = (float) $request->amount;
+
+        // Check if source account has sufficient balance
+        if ($fromAccount->balance < $amount) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Insufficient balance in source account.'
+            ], 400);
+        }
+
+        // Get or create a "Transfer" category for both income and expense
+        $transferExpenseCategory = \App\Models\Category::firstOrCreate(
+            ['user_id' => $userId, 'name' => 'Transfer Out', 'type' => 'expense'],
+            ['name' => 'Transfer Out', 'type' => 'expense', 'user_id' => $userId]
+        );
+        
+        $transferIncomeCategory = \App\Models\Category::firstOrCreate(
+            ['user_id' => $userId, 'name' => 'Transfer In', 'type' => 'income'],
+            ['name' => 'Transfer In', 'type' => 'income', 'user_id' => $userId]
+        );
+
+        $description = $request->description ?: "Transfer from {$fromAccount->name} to {$toAccount->name}";
+        $date = $request->date;
+
+        // Use database transaction for atomicity
+        \Illuminate\Support\Facades\DB::beginTransaction();
+        try {
+            // Create expense transaction (money leaving source account)
+            $expenseTransaction = \App\Models\Transaction::create([
+                'user_id' => $userId,
+                'account_id' => $fromAccount->id,
+                'category_id' => $transferExpenseCategory->id,
+                'amount' => $amount,
+                'type' => 'expense',
+                'date' => $date,
+                'description' => $description,
+            ]);
+
+            // Create income transaction (money entering destination account)
+            $incomeTransaction = \App\Models\Transaction::create([
+                'user_id' => $userId,
+                'account_id' => $toAccount->id,
+                'category_id' => $transferIncomeCategory->id,
+                'amount' => $amount,
+                'type' => 'income',
+                'date' => $date,
+                'description' => $description,
+            ]);
+
+            // Update account balances
+            $fromAccount->balance -= $amount;
+            $fromAccount->save();
+
+            $toAccount->balance += $amount;
+            $toAccount->save();
+
+            \Illuminate\Support\Facades\DB::commit();
+
+            // Clear caches
+            $this->clearAccountCaches();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Transfer completed successfully.',
+                'data' => [
+                    'from_account' => $fromAccount->fresh(),
+                    'to_account' => $toAccount->fresh(),
+                    'expense_transaction' => $expenseTransaction->load('category'),
+                    'income_transaction' => $incomeTransaction->load('category'),
+                ]
+            ]);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Transfer failed. Please try again.'
+            ], 500);
+        }
+    }
 }
