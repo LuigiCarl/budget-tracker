@@ -35,14 +35,49 @@ class AccountController extends Controller
             $endOfMonth = date('Y-m-t', strtotime($startOfMonth));
             $today = date('Y-m-d');
             
-            $accounts = $query->get()->map(function($account) use ($startOfMonth, $endOfMonth, $today) {
-                // Check if account existed in this month
-                // Account exists if it was created on or before the end of the month
+            // Get all accounts first
+            $accountsList = $query->get();
+            $accountIds = $accountsList->pluck('id');
+            
+            // Get transfer category IDs to exclude from income/expense totals
+            $transferCategoryIds = \App\Models\Category::where('user_id', Auth::id())
+                ->whereIn('name', ['Transfer In', 'Transfer Out'])
+                ->pluck('id');
+            
+            // OPTIMIZED: Single query for all month transactions aggregated by account (excluding transfers)
+            $monthStats = \App\Models\Transaction::whereIn('account_id', $accountIds)
+                ->whereNotIn('category_id', $transferCategoryIds)
+                ->whereBetween('date', [$startOfMonth, $endOfMonth])
+                ->select(
+                    'account_id',
+                    \Illuminate\Support\Facades\DB::raw("SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END) as month_income"),
+                    \Illuminate\Support\Facades\DB::raw("SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END) as month_expenses"),
+                    \Illuminate\Support\Facades\DB::raw("COUNT(*) as transaction_count")
+                )
+                ->groupBy('account_id')
+                ->get()
+                ->keyBy('account_id');
+            
+            // OPTIMIZED: Single query for transactions after month (for historical balance)
+            $afterMonthStats = [];
+            if ($endOfMonth < $today) {
+                $afterMonthStats = \App\Models\Transaction::whereIn('account_id', $accountIds)
+                    ->whereDate('date', '>', $endOfMonth)
+                    ->select(
+                        'account_id',
+                        \Illuminate\Support\Facades\DB::raw("SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END) as income_after"),
+                        \Illuminate\Support\Facades\DB::raw("SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END) as expenses_after")
+                    )
+                    ->groupBy('account_id')
+                    ->get()
+                    ->keyBy('account_id');
+            }
+            
+            $accounts = $accountsList->map(function($account) use ($startOfMonth, $endOfMonth, $today, $monthStats, $afterMonthStats) {
                 $accountCreatedDate = $account->created_at->format('Y-m-d');
                 $accountExistedInMonth = $accountCreatedDate <= $endOfMonth;
                 
                 if (!$accountExistedInMonth) {
-                    // Account didn't exist yet, return with zero balance for this month
                     $account->month_income = 0;
                     $account->month_expenses = 0;
                     $account->month_transaction_count = 0;
@@ -52,48 +87,71 @@ class AccountController extends Controller
                     return $account;
                 }
                 
-                // Account existed, get transactions for this month only
-                $monthTransactions = $account->transactions()
-                    ->whereBetween('date', [$startOfMonth, $endOfMonth])
-                    ->get();
-                
-                $account->month_income = $monthTransactions->where('type', 'income')->sum('amount');
-                $account->month_expenses = $monthTransactions->where('type', 'expense')->sum('amount');
-                $account->month_transaction_count = $monthTransactions->count();
-                
-                // Calculate net change for this month only (for display purposes)
+                // Get pre-aggregated stats
+                $stats = $monthStats->get($account->id);
+                $account->month_income = $stats ? (float) $stats->month_income : 0;
+                $account->month_expenses = $stats ? (float) $stats->month_expenses : 0;
+                $account->month_transaction_count = $stats ? (int) $stats->transaction_count : 0;
                 $account->month_balance = $account->month_income - $account->month_expenses;
                 
-                // Calculate cumulative balance
-                // account->balance is the CURRENT balance (already includes all transactions)
                 $currentBalance = (float) $account->balance;
                 
                 if ($endOfMonth >= $today) {
-                    // Current or future month - use current balance
                     $account->cumulative_balance = $currentBalance;
                 } else {
-                    // Past month - subtract transactions after end of month to get historical balance
-                    $incomeAfterMonth = $account->transactions()
-                        ->where('type', 'income')
-                        ->whereDate('date', '>', $endOfMonth)
-                        ->sum('amount');
-                    
-                    $expensesAfterMonth = $account->transactions()
-                        ->where('type', 'expense')
-                        ->whereDate('date', '>', $endOfMonth)
-                        ->sum('amount');
-                    
-                    $account->cumulative_balance = $currentBalance - $incomeAfterMonth + $expensesAfterMonth;
+                    $afterStats = isset($afterMonthStats[$account->id]) ? $afterMonthStats[$account->id] : null;
+                    $incomeAfter = $afterStats ? (float) $afterStats->income_after : 0;
+                    $expensesAfter = $afterStats ? (float) $afterStats->expenses_after : 0;
+                    $account->cumulative_balance = $currentBalance - $incomeAfter + $expensesAfter;
                 }
                 
                 $account->account_existed = true;
-                
+                return $account;
+            });
+            
+            // Calculate initial_balance for each account (for editing purposes)
+            $netTransactions = \App\Models\Transaction::whereIn('account_id', $accountIds)
+                ->select(
+                    'account_id',
+                    \Illuminate\Support\Facades\DB::raw("SUM(CASE WHEN type = 'income' THEN amount ELSE -amount END) as net")
+                )
+                ->groupBy('account_id')
+                ->get()
+                ->keyBy('account_id');
+            
+            $accounts = $accounts->map(function($account) use ($netTransactions) {
+                $net = $netTransactions->get($account->id);
+                $netAmount = $net ? (float) $net->net : 0;
+                $account->initial_balance = (float) $account->balance - $netAmount;
                 return $account;
             });
         } else {
-            $accounts = $query->withCount('transactions')->get()->map(function($account) {
+            // Get all accounts first
+            $accounts = \App\Models\Account::where('user_id', Auth::id())
+                ->withCount('transactions')
+                ->get();
+            
+            $allAccountIds = $accounts->pluck('id');
+            
+            // Get net transactions for all accounts
+            $netTransactions = \App\Models\Transaction::whereIn('account_id', $allAccountIds)
+                ->select(
+                    'account_id',
+                    \Illuminate\Support\Facades\DB::raw("SUM(CASE WHEN type = 'income' THEN amount ELSE -amount END) as net")
+                )
+                ->groupBy('account_id')
+                ->get()
+                ->keyBy('account_id');
+            
+            $accounts = $accounts->map(function($account) use ($netTransactions) {
                 // For non-filtered view, use current balance directly (it already includes all transactions)
                 $account->cumulative_balance = (float) $account->balance;
+                
+                // Calculate initial_balance
+                $net = $netTransactions->get($account->id);
+                $netAmount = $net ? (float) $net->net : 0;
+                $account->initial_balance = (float) $account->balance - $netAmount;
+                
                 return $account;
             });
         }
@@ -234,6 +292,8 @@ class AccountController extends Controller
 
     /**
      * Update the specified resource in storage.
+     * Note: The balance field represents the INITIAL balance (before any transactions).
+     * The actual current balance is calculated as: initial_balance + sum(income) - sum(expenses)
      */
     public function update(Request $request, $id)
     {
@@ -244,7 +304,7 @@ class AccountController extends Controller
             $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
                 'name' => 'required|string|max:255',
                 'type' => 'required|in:cash,bank,checking,savings,credit_card,investment',
-                'balance' => 'required|numeric|min:0',
+                'balance' => 'required|numeric',
                 'description' => 'nullable|string|max:500',
             ]);
             
@@ -260,15 +320,25 @@ class AccountController extends Controller
             $request->validate([
                 'name' => 'required|string|max:255',
                 'type' => 'required|in:cash,bank,checking,savings,credit_card,investment',
-                'balance' => 'required|numeric|min:0',
+                'balance' => 'required|numeric',
                 'description' => 'nullable|string|max:500',
             ]);
         }
 
+        // Calculate the net effect of all transactions on this account
+        $netFromTransactions = $account->transactions()
+            ->selectRaw("COALESCE(SUM(CASE WHEN type = 'income' THEN amount ELSE -amount END), 0) as net")
+            ->value('net');
+        
+        // The new balance should be: new_initial_balance + net_from_transactions
+        // Where new_initial_balance is what the user entered as "balance"
+        $newInitialBalance = (float) $request->balance;
+        $calculatedBalance = $newInitialBalance + (float) $netFromTransactions;
+
         $account->update([
             'name' => $request->name,
             'type' => $request->type,
-            'balance' => $request->balance,
+            'balance' => $calculatedBalance,
             'description' => $request->description,
         ]);
         

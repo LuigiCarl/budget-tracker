@@ -21,17 +21,17 @@ trait CachesApiResponses
     /**
      * Default cache TTL in seconds
      */
-    protected int $defaultCacheTtl = 300; // 5 minutes
+    protected int $defaultCacheTtl = 30; // 30 seconds for faster updates
     
     /**
      * Long cache TTL for rarely changing data
      */
-    protected int $longCacheTtl = 900; // 15 minutes
+    protected int $longCacheTtl = 300; // 5 minutes
     
     /**
      * Short cache TTL for frequently changing data
      */
-    protected int $shortCacheTtl = 60; // 1 minute
+    protected int $shortCacheTtl = 10; // 10 seconds for near real-time
 
     /**
      * Generate a user-specific cache key

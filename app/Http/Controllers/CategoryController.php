@@ -18,9 +18,18 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        $categories = \App\Models\Category::where('user_id', Auth::id())
-            ->withCount(['transactions', 'budgets'])
-            ->get();
+        // Check if we should exclude transfer categories (for transaction forms)
+        $excludeTransfer = request()->get('exclude_transfer', false);
+        
+        $query = \App\Models\Category::where('user_id', Auth::id())
+            ->withCount(['transactions', 'budgets']);
+        
+        // Exclude transfer categories if requested
+        if ($excludeTransfer) {
+            $query->whereNotIn('name', ['Transfer In', 'Transfer Out']);
+        }
+        
+        $categories = $query->get();
 
         // Return JSON for API requests
         if (request()->expectsJson() || request()->is('api/*')) {
@@ -179,6 +188,20 @@ class CategoryController extends Controller
             'color' => 'required|string|regex:/^#?[A-Fa-f0-9]{6}$/',
             'is_default' => 'boolean',
         ]);
+
+        // Prevent type change if category has transactions
+        if ($request->type !== $category->type && $category->transactions()->count() > 0) {
+            if (request()->expectsJson() || request()->is('api/*')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Cannot change category type when transactions exist. Delete transactions first or create a new category.',
+                    'errors' => [
+                        'type' => ['Cannot change category type when transactions exist.']
+                    ]
+                ], 422);
+            }
+            return back()->withErrors(['type' => 'Cannot change category type when transactions exist.']);
+        }
 
         // Ensure color starts with #
         $color = $request->color;

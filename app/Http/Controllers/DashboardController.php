@@ -65,13 +65,13 @@ class DashboardController extends Controller
     
     /**
      * Compute dashboard stats (extracted for caching)
+     * OPTIMIZED: Uses aggregated queries instead of N+1 loops
      */
     private function computeStats($userId, $period, $year = null, $month = null)
     {
         // Determine date range first
         $dateRange = null;
         if ($year && $month) {
-            // Use specific year/month
             $startDate = \Carbon\Carbon::create($year, $month, 1)->startOfMonth()->toDateString();
             $endDate = \Carbon\Carbon::create($year, $month, 1)->endOfMonth()->toDateString();
             $dateRange = [$startDate, $endDate];
@@ -79,95 +79,107 @@ class DashboardController extends Controller
             $dateRange = $this->getDateRange($period);
         }
         
-        // Calculate total balance for the selected month
-        // account->balance already contains the current running balance (initial + all transactions)
-        // For historical months, we need to calculate what the balance WAS at that point
+        // OPTIMIZED: Calculate total balance with single aggregated query
         if ($dateRange) {
             $endOfMonth = $dateRange[1];
-            $startOfMonth = $dateRange[0];
             $today = now()->format('Y-m-d');
             
-            // Get accounts that existed in this month (created on or before end of month)
+            // Get accounts that existed in this month
             $accounts = \App\Models\Account::where('user_id', $userId)
                 ->whereDate('created_at', '<=', $endOfMonth)
                 ->get();
             
-            $totalBalance = 0;
-            
-            foreach ($accounts as $account) {
-                // Current balance from DB already includes all transactions ever made
-                $currentBalance = (float) $account->balance;
+            if ($endOfMonth >= $today) {
+                // Current/future month - just sum current balances
+                $totalBalance = $accounts->sum('balance');
+            } else {
+                // Past month - get all adjustments in one query
+                $accountIds = $accounts->pluck('id');
                 
-                // If viewing current month or future, just use current balance
-                if ($endOfMonth >= $today) {
-                    $totalBalance += $currentBalance;
-                } else {
-                    // For past months, subtract transactions AFTER the end of that month
-                    // to get what the balance WAS at end of that month
-                    $incomeAfterMonth = \App\Models\Transaction::where('account_id', $account->id)
-                        ->where('type', 'income')
-                        ->whereDate('date', '>', $endOfMonth)
-                        ->sum('amount');
-                    
-                    $expensesAfterMonth = \App\Models\Transaction::where('account_id', $account->id)
-                        ->where('type', 'expense')
-                        ->whereDate('date', '>', $endOfMonth)
-                        ->sum('amount');
-                    
-                    // Balance at end of month = current balance - income after + expenses after
-                    $balanceAtEndOfMonth = $currentBalance - $incomeAfterMonth + $expensesAfterMonth;
-                    $totalBalance += $balanceAtEndOfMonth;
+                $afterMonthStats = \App\Models\Transaction::whereIn('account_id', $accountIds)
+                    ->whereDate('date', '>', $endOfMonth)
+                    ->select(
+                        'account_id',
+                        DB::raw("SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END) as income_after"),
+                        DB::raw("SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END) as expenses_after")
+                    )
+                    ->groupBy('account_id')
+                    ->get()
+                    ->keyBy('account_id');
+                
+                $totalBalance = 0;
+                foreach ($accounts as $account) {
+                    $currentBalance = (float) $account->balance;
+                    $stats = $afterMonthStats->get($account->id);
+                    if ($stats) {
+                        $totalBalance += $currentBalance - (float)$stats->income_after + (float)$stats->expenses_after;
+                    } else {
+                        $totalBalance += $currentBalance;
+                    }
                 }
             }
         } else {
-            // For all-time, just sum current balances (they already include all transactions)
             $totalBalance = \App\Models\Account::where('user_id', $userId)->sum('balance');
         }
         
-        // Calculate totals based on date range
-        $incomeQuery = \App\Models\Transaction::where('user_id', $userId)->where('type', 'income');
-        $expenseQuery = \App\Models\Transaction::where('user_id', $userId)->where('type', 'expense');
+        // Get transfer category IDs to exclude from income/expense totals
+        $transferCategoryIds = \App\Models\Category::where('user_id', $userId)
+            ->whereIn('name', ['Transfer In', 'Transfer Out'])
+            ->pluck('id');
+        
+        // OPTIMIZED: Single query for income and expenses (excluding transfers)
+        $totals = \App\Models\Transaction::where('user_id', $userId)
+            ->whereNotIn('category_id', $transferCategoryIds)
+            ->when($dateRange, function($q) use ($dateRange) {
+                $q->whereBetween('date', $dateRange);
+            })
+            ->select(
+                DB::raw("SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END) as total_income"),
+                DB::raw("SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END) as total_expenses")
+            )
+            ->first();
+        
+        $totalIncome = (float) ($totals->total_income ?? 0);
+        $totalExpenses = (float) ($totals->total_expenses ?? 0);
+        
+        // Calculate category spending with date range - OPTIMIZED: Single query with aggregation
+        $categorySpendingQuery = \App\Models\Transaction::where('user_id', $userId)
+            ->where('type', 'expense')
+            ->select('category_id', DB::raw('SUM(amount) as total_spent'))
+            ->groupBy('category_id');
         
         if ($dateRange) {
-            $incomeQuery->whereBetween('date', $dateRange);
-            $expenseQuery->whereBetween('date', $dateRange);
+            $categorySpendingQuery->whereBetween('date', $dateRange);
         }
         
-        $totalIncome = $incomeQuery->sum('amount');
-        $totalExpenses = $expenseQuery->sum('amount');
+        $spendingByCategory = $categorySpendingQuery->pluck('total_spent', 'category_id');
         
-        // Calculate category spending with date range
-        // PostgreSQL-compatible query: simpler approach without complex joins
+        // Get all expense categories with their budgets in one query
+        // Exclude transfer categories from spending breakdown
         $categories = \App\Models\Category::where('user_id', $userId)
             ->where('type', 'expense')
+            ->whereNotIn('name', ['Transfer Out', 'Transfer In'])
             ->get();
-            
+        
+        // Get all active budgets for these categories in one query
+        $activeBudgets = \App\Models\Budget::where('user_id', $userId)
+            ->whereIn('category_id', $categories->pluck('id'))
+            ->whereDate('start_date', '<=', now())
+            ->whereDate('end_date', '>=', now())
+            ->get()
+            ->keyBy('category_id');
+        
         $categorySpending = collect();
         
         foreach ($categories as $category) {
-            // Calculate spending for this category
-            $spendingQuery = \App\Models\Transaction::where('user_id', $userId)
-                ->where('category_id', $category->id)
-                ->where('type', 'expense');
-            
-            if ($dateRange) {
-                $spendingQuery->whereBetween('date', $dateRange);
-            }
-            
-            $spending = $spendingQuery->sum('amount');
+            $spending = $spendingByCategory->get($category->id, 0);
             
             // Skip categories with no spending
             if ($spending <= 0) {
                 continue;
             }
             
-            // Get active budget for this category
-            $budget = \App\Models\Budget::where('user_id', $userId)
-                ->where('category_id', $category->id)
-                ->whereDate('start_date', '<=', now())
-                ->whereDate('end_date', '>=', now())
-                ->first();
-            
+            $budget = $activeBudgets->get($category->id);
             $budgetLimit = $budget ? (float) $budget->amount : 0;
             $percentage = $budgetLimit > 0 ? ($spending / $budgetLimit * 100) : 0;
             
