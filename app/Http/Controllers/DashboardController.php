@@ -80,32 +80,63 @@ class DashboardController extends Controller
         }
         
         // Calculate total balance for the selected month
-        // This is the sum of income - expenses for accounts that existed in that month
+        // This includes: initial balance of accounts + net transactions up to end of selected month
         if ($dateRange) {
             $endOfMonth = $dateRange[1];
+            $startOfMonth = $dateRange[0];
             
             // Get accounts that existed in this month (created on or before end of month)
-            $accountIds = \App\Models\Account::where('user_id', $userId)
+            $accounts = \App\Models\Account::where('user_id', $userId)
                 ->whereDate('created_at', '<=', $endOfMonth)
-                ->pluck('id');
+                ->get();
             
-            // Calculate net balance for the month from those accounts
-            $monthIncome = \App\Models\Transaction::where('user_id', $userId)
-                ->whereIn('account_id', $accountIds)
-                ->where('type', 'income')
-                ->whereBetween('date', $dateRange)
-                ->sum('amount');
+            $totalBalance = 0;
+            
+            foreach ($accounts as $account) {
+                // Start with the initial balance when account was created
+                $accountBalance = (float) $account->balance;
                 
-            $monthExpenses = \App\Models\Transaction::where('user_id', $userId)
-                ->whereIn('account_id', $accountIds)
-                ->where('type', 'expense')
-                ->whereBetween('date', $dateRange)
-                ->sum('amount');
+                // Add all transactions from account creation up to end of selected month
+                $accountCreatedDate = $account->created_at->format('Y-m-d');
                 
-            $totalBalance = $monthIncome - $monthExpenses;
+                // Get all income transactions from account creation to end of month
+                $incomeUpToMonth = \App\Models\Transaction::where('account_id', $account->id)
+                    ->where('type', 'income')
+                    ->whereDate('date', '>=', $accountCreatedDate)
+                    ->whereDate('date', '<=', $endOfMonth)
+                    ->sum('amount');
+                
+                // Get all expense transactions from account creation to end of month
+                $expensesUpToMonth = \App\Models\Transaction::where('account_id', $account->id)
+                    ->where('type', 'expense')
+                    ->whereDate('date', '>=', $accountCreatedDate)
+                    ->whereDate('date', '<=', $endOfMonth)
+                    ->sum('amount');
+                
+                // Account balance = initial balance + income - expenses
+                $accountBalance += $incomeUpToMonth - $expensesUpToMonth;
+                $totalBalance += $accountBalance;
+            }
         } else {
-            // For all-time, use the sum of all account balances
-            $totalBalance = \App\Models\Account::where('user_id', $userId)->sum('balance');
+            // For all-time, use the sum of all account balances plus net transactions
+            $accounts = \App\Models\Account::where('user_id', $userId)->get();
+            $totalBalance = 0;
+            
+            foreach ($accounts as $account) {
+                $accountBalance = (float) $account->balance;
+                
+                // Add net transactions since account creation
+                $income = \App\Models\Transaction::where('account_id', $account->id)
+                    ->where('type', 'income')
+                    ->sum('amount');
+                    
+                $expenses = \App\Models\Transaction::where('account_id', $account->id)
+                    ->where('type', 'expense')
+                    ->sum('amount');
+                
+                $accountBalance += $income - $expenses;
+                $totalBalance += $accountBalance;
+            }
         }
         
         // Calculate totals based on date range

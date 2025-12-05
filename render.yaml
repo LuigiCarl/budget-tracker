@@ -8,19 +8,23 @@ services:
   envVars:
       # Application Settings
       - key: APP_NAME
-        value: Budget Tracker
+        value: FinanEase
       - key: APP_ENV
         value: production
       - key: APP_DEBUG
         value: false
       - key: APP_URL
-        value: https://budget-tracker-gcjt.onrender.com
+        value: https://budget-tracker-xpoz.onrender.com
       - key: APP_KEY
         generateValue: true # Render will generate this automatically
       - key: APP_FORCE_HTTPS
         value: true
       - key: ASSET_URL
-        value: https://budget-tracker-gcjt.onrender.com
+        value: https://budget-tracker-xpoz.onrender.com
+      
+      # Frontend URL for CORS
+      - key: FRONTEND_URL
+        value: https://finanease-production.vercel.app
       
       # Database Configuration - Supabase PostgreSQL
       # Get these values from Supabase: Settings > Database > Connection Info

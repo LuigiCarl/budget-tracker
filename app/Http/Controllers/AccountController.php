@@ -46,6 +46,7 @@ class AccountController extends Controller
                     $account->month_expenses = 0;
                     $account->month_transaction_count = 0;
                     $account->month_balance = 0;
+                    $account->cumulative_balance = 0;
                     $account->account_existed = false;
                     return $account;
                 }
@@ -59,14 +60,42 @@ class AccountController extends Controller
                 $account->month_expenses = $monthTransactions->where('type', 'expense')->sum('amount');
                 $account->month_transaction_count = $monthTransactions->count();
                 
-                // Calculate balance for this month (sum of transactions in this month)
+                // Calculate net change for this month only (for display purposes)
                 $account->month_balance = $account->month_income - $account->month_expenses;
+                
+                // Calculate cumulative balance: initial balance + all transactions up to end of this month
+                $initialBalance = (float) $account->balance;
+                
+                // Get all income from account creation to end of month
+                $incomeUpToMonth = $account->transactions()
+                    ->where('type', 'income')
+                    ->whereDate('date', '>=', $accountCreatedDate)
+                    ->whereDate('date', '<=', $endOfMonth)
+                    ->sum('amount');
+                
+                // Get all expenses from account creation to end of month
+                $expensesUpToMonth = $account->transactions()
+                    ->where('type', 'expense')
+                    ->whereDate('date', '>=', $accountCreatedDate)
+                    ->whereDate('date', '<=', $endOfMonth)
+                    ->sum('amount');
+                
+                $account->cumulative_balance = $initialBalance + $incomeUpToMonth - $expensesUpToMonth;
                 $account->account_existed = true;
                 
                 return $account;
             });
         } else {
-            $accounts = $query->withCount('transactions')->get();
+            $accounts = $query->withCount('transactions')->get()->map(function($account) {
+                // For non-filtered view, calculate current balance including initial balance
+                $initialBalance = (float) $account->balance;
+                
+                $totalIncome = $account->transactions()->where('type', 'income')->sum('amount');
+                $totalExpenses = $account->transactions()->where('type', 'expense')->sum('amount');
+                
+                $account->cumulative_balance = $initialBalance + $totalIncome - $totalExpenses;
+                return $account;
+            });
         }
 
         // Return JSON for API requests

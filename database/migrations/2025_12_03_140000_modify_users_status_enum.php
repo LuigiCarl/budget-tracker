@@ -13,12 +13,24 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // For MySQL, we need to modify the enum values
         // First, update any 'inactive' values to 'active' (since we're removing 'inactive')
         DB::table('users')->where('status', 'inactive')->update(['status' => 'active']);
         
-        // Now modify the enum to use 'active' and 'blocked'
-        DB::statement("ALTER TABLE users MODIFY COLUMN status ENUM('active', 'blocked') DEFAULT 'active'");
+        // Database-agnostic approach: drop and recreate the column
+        $driver = DB::connection()->getDriverName();
+        
+        if ($driver === 'pgsql') {
+            // PostgreSQL: Use ALTER TYPE or recreate
+            // First check if type exists and add new value
+            DB::statement("ALTER TABLE users ALTER COLUMN status TYPE VARCHAR(20)");
+            DB::statement("ALTER TABLE users ALTER COLUMN status SET DEFAULT 'active'");
+            // Add check constraint for PostgreSQL
+            DB::statement("ALTER TABLE users DROP CONSTRAINT IF EXISTS users_status_check");
+            DB::statement("ALTER TABLE users ADD CONSTRAINT users_status_check CHECK (status IN ('active', 'blocked'))");
+        } else {
+            // MySQL: Use MODIFY COLUMN with ENUM
+            DB::statement("ALTER TABLE users MODIFY COLUMN status ENUM('active', 'blocked') DEFAULT 'active'");
+        }
     }
 
     /**
@@ -29,7 +41,15 @@ return new class extends Migration
         // Convert blocked users back to inactive
         DB::table('users')->where('status', 'blocked')->update(['status' => 'inactive']);
         
-        // Restore original enum
-        DB::statement("ALTER TABLE users MODIFY COLUMN status ENUM('active', 'inactive') DEFAULT 'active'");
+        $driver = DB::connection()->getDriverName();
+        
+        if ($driver === 'pgsql') {
+            // PostgreSQL: Restore original constraint
+            DB::statement("ALTER TABLE users DROP CONSTRAINT IF EXISTS users_status_check");
+            DB::statement("ALTER TABLE users ADD CONSTRAINT users_status_check CHECK (status IN ('active', 'inactive'))");
+        } else {
+            // MySQL: Restore original enum
+            DB::statement("ALTER TABLE users MODIFY COLUMN status ENUM('active', 'inactive') DEFAULT 'active'");
+        }
     }
 };
