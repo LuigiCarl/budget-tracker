@@ -47,13 +47,13 @@ class ResetPasswordNotification extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         // Build the reset URL for your frontend app
-        $frontendUrl = config('app.frontend_url', env('FRONTEND_URL', 'http://localhost:5173'));
+        $frontendUrl = config('app.frontend_url', env('FRONTEND_URL', 'https://finanease-production.vercel.app'));
         $resetUrl = $frontendUrl . '/reset-password?token=' . $this->token . '&email=' . urlencode($notifiable->getEmailForPasswordReset());
 
         return (new MailMessage)
-            ->subject('Reset Your Password - Budget Tracker')
+            ->subject('Reset Your Password - FinanEase')
             ->greeting('Hello ' . ($notifiable->name ?? 'there') . '!')
-            ->line('You are receiving this email because we received a password reset request for your Budget Tracker account.')
+            ->line('You are receiving this email because we received a password reset request for your FinanEase account.')
             ->line('Click the button below to reset your password:')
             ->action('Reset Password', $resetUrl)
             ->line('This password reset link will expire in ' . $this->expireMinutes . ' minutes.')
@@ -61,7 +61,7 @@ class ResetPasswordNotification extends Notification
             ->line('• If you did not request this reset, please ignore this email.')
             ->line('• Never share your password with anyone.')
             ->line('• Use a strong, unique password for your account.')
-            ->salutation('Best regards,' . "\n" . 'The Budget Tracker Team');
+            ->salutation('Best regards,' . "\n" . 'The FinanEase Team');
     }
 
     /**
