@@ -15,7 +15,8 @@
         "laravel/tinker": "^2.10.1",
         "nyholm/psr7": "^1.8",
         "railsware/mailtrap-php": "^3.9",
-        "symfony/http-client": "^8.0"
+        "symfony/http-client": "^8.0",
+        "symfony/mailtrap-mailer": "^7.4"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

@@ -2,7 +2,6 @@
 
 namespace App\Mail;
 
-use Illuminate\Mail\Transport\Transport;
 use Mailtrap\Config;
 use Mailtrap\MailtrapClient;
 use Mailtrap\Mime\MailtrapEmail;
@@ -14,12 +13,15 @@ use Symfony\Component\Mime\MessageConverter;
 class MailtrapApiTransport extends AbstractTransport
 {
     protected MailtrapClient $client;
+    protected ?int $inboxId;
 
     public function __construct()
     {
         parent::__construct();
         
         $apiKey = config('services.mailtrap.token');
+        $this->inboxId = config('services.mailtrap.inbox_id') ? (int) config('services.mailtrap.inbox_id') : null;
+        
         $this->client = new MailtrapClient(
             new Config($apiKey)
         );
@@ -60,8 +62,14 @@ class MailtrapApiTransport extends AbstractTransport
             $mailtrapEmail->text($email->getTextBody());
         }
 
-        // Send via Mailtrap API
-        $this->client->sending()->emails()->send($mailtrapEmail);
+        // Use Testing API if inbox_id is set, otherwise use Sending API
+        if ($this->inboxId) {
+            // Email Testing (sandbox) - sends to inbox for testing
+            $this->client->testing()->emails()->send($mailtrapEmail, $this->inboxId);
+        } else {
+            // Transactional Sending API - requires verified domain
+            $this->client->sending()->emails()->send($mailtrapEmail);
+        }
     }
 
     public function __toString(): string
