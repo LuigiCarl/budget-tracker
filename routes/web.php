@@ -56,4 +56,40 @@ Route::get('/api-docs', function () {
     return view('docs.api');
 })->middleware(['auth'])->name('api.docs');
 
+// Public Documentation Routes
+Route::prefix('docs')->name('docs.')->group(function () {
+    // Getting Started
+    Route::get('/', fn() => view('docs.index'))->name('index');
+    Route::get('/installation', fn() => view('docs.installation'))->name('installation');
+    Route::get('/quickstart', fn() => view('docs.quickstart'))->name('quickstart');
+    
+    // Features
+    Route::prefix('features')->name('features.')->group(function () {
+        Route::get('/dashboard', fn() => view('docs.features.dashboard'))->name('dashboard');
+        Route::get('/transactions', fn() => view('docs.features.transactions'))->name('transactions');
+        Route::get('/budgets', fn() => view('docs.features.budgets'))->name('budgets');
+        Route::get('/accounts', fn() => view('docs.features.accounts'))->name('accounts');
+        Route::get('/categories', fn() => view('docs.features.categories'))->name('categories');
+    });
+    
+    // API Reference
+    Route::prefix('api')->name('api.')->group(function () {
+        Route::get('/authentication', fn() => view('docs.api.authentication'))->name('authentication');
+        Route::get('/endpoints', fn() => view('docs.api.endpoints'))->name('endpoints');
+        Route::get('/errors', fn() => view('docs.api.errors'))->name('errors');
+    });
+    
+    // Advanced
+    Route::get('/deployment', fn() => view('docs.deployment'))->name('deployment');
+    Route::get('/testing', fn() => view('docs.testing'))->name('testing');
+    Route::get('/troubleshooting', fn() => view('docs.troubleshooting'))->name('troubleshooting');
+    
+    // Components (keeping for reference)
+    Route::prefix('components')->name('components.')->group(function () {
+        Route::get('/buttons', fn() => view('docs.components.buttons'))->name('buttons');
+        Route::get('/forms', fn() => view('docs.components.forms'))->name('forms');
+        Route::get('/cards', fn() => view('docs.components.cards'))->name('cards');
+    });
+});
+
 require __DIR__.'/auth.php';
