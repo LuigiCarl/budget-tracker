@@ -7,11 +7,11 @@
 @endsection
 
 @section('content')
-<h1>Budgets</h1>
-
-<p class="text-xl text-muted-foreground">
-    Set spending limits and track your progress to achieve your financial goals.
-</p>
+<div class="mb-8">
+    <div class="mb-2 inline-block px-3 py-1 rounded-full bg-[#F59E0B]/10 text-[#F59E0B] text-xs font-semibold">Feature</div>
+    <h1 class="text-4xl font-bold tracking-tight mb-3">Budgets</h1>
+    <p class="text-lg text-muted-foreground">Set spending limits and track your progress to achieve your financial goals.</p>
+</div>
 
 <div class="my-6 rounded-lg border overflow-hidden">
     <div class="bg-gradient-to-r from-[#F59E0B] to-[#D97706] p-4">

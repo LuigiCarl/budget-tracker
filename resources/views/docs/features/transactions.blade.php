@@ -7,11 +7,11 @@
 @endsection
 
 @section('content')
-<h1>Transactions</h1>
-
-<p class="text-xl text-muted-foreground">
-    Track every peso that flows through your accounts with detailed transaction management.
-</p>
+<div class="mb-8">
+    <div class="mb-2 inline-block px-3 py-1 rounded-full bg-[#10B981]/10 text-[#10B981] text-xs font-semibold">Feature</div>
+    <h1 class="text-4xl font-bold tracking-tight mb-3">Transactions</h1>
+    <p class="text-lg text-muted-foreground">Track every peso that flows through your accounts with detailed transaction management.</p>
+</div>
 
 <div class="my-6 rounded-lg border overflow-hidden">
     <div class="bg-gradient-to-r from-[#10B981] to-[#059669] p-4">

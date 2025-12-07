@@ -11,11 +11,11 @@
 @endsection
 
 @section('content')
-<h1>FinanEase Documentation</h1>
-
-<p class="text-xl text-muted-foreground">
-    A modern personal finance management application built with Laravel and React.
-</p>
+<div class="mb-12">
+    <div class="mb-2 inline-block px-3 py-1 rounded-full bg-[#6366F1]/10 text-[#6366F1] text-xs font-semibold">Welcome</div>
+    <h1 class="text-4xl font-bold tracking-tight mb-3">FinanEase Documentation</h1>
+    <p class="text-lg text-muted-foreground">A modern personal finance management application built with Laravel and React.</p>
+</div>
 
 <div class="mt-6 grid gap-4 md:grid-cols-2">
     <div class="rounded-lg border bg-card p-6 hover:shadow-lg transition-shadow">

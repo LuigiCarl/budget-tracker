@@ -11,11 +11,11 @@
 @endsection
 
 @section('content')
-<h1>Installation</h1>
-
-<p class="text-xl text-muted-foreground">
-    Get your Laravel application up and running in minutes.
-</p>
+<div class="mb-8">
+    <div class="mb-2 inline-block px-3 py-1 rounded-full bg-[#6366F1]/10 text-[#6366F1] text-xs font-semibold">Getting Started</div>
+    <h1 class="text-4xl font-bold tracking-tight mb-3">Installation</h1>
+    <p class="text-lg text-muted-foreground">Get your Laravel application up and running in minutes.</p>
+</div>
 
 ## Prerequisites
 

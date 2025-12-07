@@ -7,11 +7,11 @@
 @endsection
 
 @section('content')
-<h1>Accounts</h1>
-
-<p class="text-xl text-muted-foreground">
-    Manage all your financial accounts in one place - from cash to bank accounts to e-wallets.
-</p>
+<div class="mb-8">
+    <div class="mb-2 inline-block px-3 py-1 rounded-full bg-[#6366F1]/10 text-[#6366F1] text-xs font-semibold">Feature</div>
+    <h1 class="text-4xl font-bold tracking-tight mb-3">Accounts</h1>
+    <p class="text-lg text-muted-foreground">Manage all your financial accounts in one place - from cash to bank accounts to e-wallets.</p>
+</div>
 
 <div class="my-6 rounded-lg border overflow-hidden">
     <div class="bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] p-4">

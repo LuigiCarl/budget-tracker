@@ -11,11 +11,11 @@
 @endsection
 
 @section('content')
-<h1>Quick Start</h1>
-
-<p class="text-xl text-muted-foreground">
-    Build your first feature in under 5 minutes with this step-by-step guide.
-</p>
+<div class="mb-8">
+    <div class="mb-2 inline-block px-3 py-1 rounded-full bg-[#6366F1]/10 text-[#6366F1] text-xs font-semibold">Getting Started</div>
+    <h1 class="text-4xl font-bold tracking-tight mb-3">Quick Start</h1>
+    <p class="text-lg text-muted-foreground">Build your first feature in under 5 minutes with this step-by-step guide.</p>
+</div>
 
 <x-docs.callout type="info" title="Prerequisites">
     Make sure you've completed the [installation guide](/docs/installation) before proceeding.

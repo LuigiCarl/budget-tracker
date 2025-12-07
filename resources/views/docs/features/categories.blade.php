@@ -7,11 +7,11 @@
 @endsection
 
 @section('content')
-<h1>Categories</h1>
-
-<p class="text-xl text-muted-foreground">
-    Organize your transactions with customizable categories for better financial insights.
-</p>
+<div class="mb-8">
+    <div class="mb-2 inline-block px-3 py-1 rounded-full bg-[#EC4899]/10 text-[#EC4899] text-xs font-semibold">Feature</div>
+    <h1 class="text-4xl font-bold tracking-tight mb-3">Categories</h1>
+    <p class="text-lg text-muted-foreground">Organize your transactions with customizable categories for better financial insights.</p>
+</div>
 
 <div class="my-6 rounded-lg border overflow-hidden">
     <div class="bg-gradient-to-r from-[#EC4899] to-[#F472B6] p-4">
