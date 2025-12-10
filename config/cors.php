@@ -20,8 +20,8 @@ return [
     'allowed_methods' => ['*'],
 
     'allowed_origins' => array_filter([
-        env('FRONTEND_URL', 'https://finanease-production.vercel.app'),
-        'https://finanease-production.vercel.app',
+        env('FRONTEND_URL', 'https://frontend-budget-tracker.vercel.app'),
+        'https://frontend-budget-tracker.vercel.app',
         'http://localhost:3000',
         'http://localhost:5173',
     ]),
