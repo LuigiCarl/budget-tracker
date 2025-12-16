@@ -2025,4 +2025,4 @@ This project is proprietary and confidential. Unauthorized copying, distribution
 
 **Last Updated:** December 16, 2025  
 **Version:** 1.0.0  
-**Maintained by:** FinanEase Budget Tracker Development Team
+**Maintained by:** Budget Tracker Development Team
