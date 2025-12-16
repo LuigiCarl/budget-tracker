@@ -357,7 +357,7 @@ protected $guarded = ['id', 'role', 'status'];
 
 ### Base URL
 ```
-Production: https://budget-tracker-mhyx.onrender.com/api
+Production: https://budget-tracker-xpoz.onrender.com/api
 Local: http://localhost:8000/api
 ```
 
